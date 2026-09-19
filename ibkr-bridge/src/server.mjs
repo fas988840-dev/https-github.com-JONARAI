@@ -25,19 +25,26 @@ function send(response, status, payload) {
 }
 
 async function route(request, response) {
-  assertServiceToken(request, token);
   const url = new URL(request.url, "http://bridge.local");
   if (request.method !== "GET") return send(response, 405, { status: "error", code: "READ_ONLY_BRIDGE" });
 
   if (url.pathname === "/health") {
-    const session = await sessionStatus(gateway);
-    return send(response, session.authenticated && session.connected ? 200 : 503, {
-      status: session.authenticated && session.connected ? "ok" : "degraded",
+    let gatewayReady = false;
+    try {
+      const session = await sessionStatus(gateway);
+      gatewayReady = session.authenticated && session.connected;
+    } catch {
+      gatewayReady = false;
+    }
+    return send(response, 200, {
+      status: "ok",
       mode: "PAPER_DATA_ONLY",
       execution_enabled: false,
-      session,
+      gateway_ready: gatewayReady,
     });
   }
+
+  assertServiceToken(request, token);
 
   if (url.pathname === "/api/search") {
     const query = cleanQuery(url.searchParams.get("query"));
