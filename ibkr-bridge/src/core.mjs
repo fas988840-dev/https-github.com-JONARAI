@@ -2,7 +2,9 @@ const DEFAULT_FIELDS = "31,84,85,86,88,7059";
 
 export function assertServiceToken(request, token) {
   if (!token) throw Object.assign(new Error("BRIDGE_API_TOKEN is not configured"), { status: 503, code: "CONFIGURATION_REQUIRED" });
-  const supplied = request.headers.get("authorization") || "";
+  const supplied = typeof request.headers?.get === "function"
+    ? request.headers.get("authorization") || ""
+    : request.headers?.authorization || request.headers?.Authorization || "";
   if (supplied !== `Bearer ${token}`) throw Object.assign(new Error("Unauthorized"), { status: 401, code: "UNAUTHORIZED" });
 }
 
