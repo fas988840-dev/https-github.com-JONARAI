@@ -1,6 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { cleanQuery, normalizeSnapshot, pickExactContract, quoteFresh } from "../src/core.mjs";
+import { assertServiceToken, cleanQuery, normalizeSnapshot, pickExactContract, quoteFresh } from "../src/core.mjs";
+
+test("service token accepts Node IncomingMessage headers", () => {
+  assert.doesNotThrow(() => assertServiceToken({ headers: { authorization: "Bearer secret" } }, "secret"));
+  assert.throws(
+    () => assertServiceToken({ headers: { authorization: "Bearer wrong" } }, "secret"),
+    /Unauthorized/,
+  );
+});
 
 test("cleanQuery rejects blanks and normalizes whitespace", () => {
   assert.throws(() => cleanQuery("   "), /query is required/);
