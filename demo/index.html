@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="JONARAI MVP — read-only educational monitoring demo">
+  <title>JONARAI | MVP تجريبي</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="JONARAI الصفحة الرئيسية"><span class="brand-mark">J</span><span>JONARAI</span></a>
+    <div class="top-meta"><span class="demo-pill">MVP تجريبي · قراءة فقط</span><span id="clock">--:--:--</span></div>
+  </header>
+  <main class="page">
+    <section class="hero">
+      <div><p class="eyebrow">SPX / SPXW · لوحة مراقبة تعليمية</p><h1>مركز معلومات السوق</h1><p class="sub">نسخة MVP تجريبية. لا يوجد اتصال حي مؤكد بمصدر السوق أو حساب وساطة.</p></div>
+      <div class="market-state"><span class="state-dot"></span><div><strong>حالة البيانات</strong><small>بانتظار مصدر موثّق</small></div></div>
+    </section>
+    <section class="panel connection-panel" aria-labelledby="robot-title">
+      <div class="panel-head"><div><h2 id="robot-title">مراقب الذكاء الاصطناعي — وضع تجريبي</h2><p>التشغيل والإيقاف يتحكمان في عرض حالة المراقبة التعليمية فقط. لا توجد أوامر تداول.</p></div><span id="robot-badge" class="tag muted">متوقف</span></div>
+      <div class="connection-actions">
+        <button id="robot-toggle" class="toggle-button" type="button" aria-pressed="false">تشغيل مراقبة AI التجريبية</button>
+        <span id="robot-status" role="status">المراقب متوقف</span>
+      </div>
+      <small class="bridge-help">هذا المفتاح ليس تشغيلًا أو إيقافًا للتداول. لا يرسل أوامر ولا يتصل بحساب وساطة ولا ينفذ صفقات؛ إنه محاكاة واجهة فقط.</small>
+    </section>
+    <section class="notice" role="status"><strong>تنبيه نزاهة البيانات:</strong> لا تعرض هذه النسخة أسعارًا أو Greeks أو إشارات تداول غير موثقة. حالة النظام الافتراضية NO TRADE.</section>
+    <section class="metrics" aria-label="حالة البيانات">
+      <article class="metric"><span>SPX</span><strong>—</strong><small>لا توجد لقطة موثقة</small></article>
+      <article class="metric"><span>SPXW / Options Chain</span><strong>—</strong><small>غير متصلة بالواجهة</small></article>
+      <article class="metric"><span>Greeks / IV</span><strong>—</strong><small>تحتاج تحققًا من المصدر</small></article>
+      <article class="metric"><span>قرار النظام</span><strong>NO TRADE</strong><small>بوابة البيانات مغلقة</small></article>
+    </section>
+    <section class="grid">
+      <article class="panel chart-panel">
+        <div class="panel-head"><div><h2>هيكل السوق</h2><p>يظهر بعد ربط مصدر بيانات والتحقق من توقيته</p></div><span class="tag">غير متاح</span></div>
+        <div class="empty-chart"><div class="chart-icon">⌁</div><strong>بانتظار بيانات موثقة</strong><span>لن يتم رسم بيانات افتراضية على أنها حقيقية.</span></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>سلامة البيانات</h2><p>شروط فتح بوابة العرض</p></div><span class="tag muted">مغلقة</span></div>
+        <ul class="checks">
+          <li><span>جلسة IBKR</span><b class="bad">غير متحقق</b></li>
+          <li><span>حداثة SPX</span><b class="bad">غير متحقق</b></li>
+          <li><span>تغطية SPXW</span><b class="bad">جزئية</b></li>
+          <li><span>IV وGreeks</span><b class="bad">غير مكتملة</b></li>
+          <li><span>تزامن التوقيت</span><b class="bad">غير مثبت</b></li>
+        </ul>
+        <div class="gate"><strong>DATA INTEGRITY GATE</strong><span>مغلق — NO TRADE</span></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>متطلبات الاشتراك والبيانات</h2><p>لا يوجد اشتراك مدفوع أو مزود مفعل مثبت هنا</p></div></div>
+        <div class="feature-list"><span>صلاحيات IBKR: تحتاج مراجعة</span><span>OPRA / Cboe: غير متحقق</span><span>Options Flow: مصدر منفصل محتمل</span><span>رسوم المزود: لم تُراجع</span></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>حالة التكاملات</h2><p>حالة مثبتة وليست افتراضية</p></div></div>
+        <div class="integration"><span>IBKR Gateway</span><b class="bad">غير متحقق</b></div>
+        <div class="integration"><span>جسر JONARAI</span><b class="bad">غير منشور / غير مختبر تكامليًا</b></div>
+        <div class="integration"><span>خيارات وGreeks</span><b class="bad">جزئية</b></div>
+        <div class="integration"><span>روبوت تداول</span><b class="bad">غير مفعّل</b></div>
+      </article>
+    </section>
+    <footer>JONARAI MVP Demo · مراقبة تعليمية للقراءة فقط · لا تنفيذ أوامر · <span id="date"></span></footer>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>
