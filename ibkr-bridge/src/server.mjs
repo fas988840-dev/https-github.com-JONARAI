@@ -12,7 +12,8 @@ import {
 } from "./core.mjs";
 
 const port = Number(process.env.PORT || 8788);
-const token = process.env.BRIDGE_API_TOKEN || "";\nconst allowedOrigin = process.env.CORS_ORIGIN || "";
+const token = process.env.BRIDGE_API_TOKEN || "";
+const allowedOrigin = process.env.CORS_ORIGIN || "";
 const gateway = createGatewayClient({ baseUrl: process.env.IBKR_GATEWAY_URL || "https://localhost:5000/v1/api" });
 
 function send(response, status, payload) {
@@ -93,6 +94,21 @@ async function route(request, response) {
 }
 
 http.createServer((request, response) => {
+  const origin = request.headers.origin || "";
+  if (origin && allowedOrigin && origin === allowedOrigin) {
+    response.setHeader("access-control-allow-origin", allowedOrigin);
+    response.setHeader("vary", "Origin");
+    response.setHeader("access-control-allow-methods", "GET, OPTIONS");
+    response.setHeader("access-control-allow-headers", "Authorization, Accept");
+  }
+  if (request.method === "OPTIONS") {
+    if (!origin || !allowedOrigin || origin !== allowedOrigin) {
+      response.writeHead(403, { "cache-control": "no-store" });
+      return response.end();
+    }
+    response.writeHead(204, { "cache-control": "no-store" });
+    return response.end();
+  }
   route(request, response).catch((error) => send(response, error.status || 500, {
     status: "error",
     code: error.code || "BRIDGE_ERROR",
