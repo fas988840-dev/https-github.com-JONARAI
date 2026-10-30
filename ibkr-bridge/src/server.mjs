@@ -12,7 +12,7 @@ import {
 } from "./core.mjs";
 
 const port = Number(process.env.PORT || 8788);
-const token = process.env.BRIDGE_API_TOKEN || "";
+const token = process.env.BRIDGE_API_TOKEN || "";\nconst allowedOrigin = process.env.CORS_ORIGIN || "";
 const gateway = createGatewayClient({ baseUrl: process.env.IBKR_GATEWAY_URL || "https://localhost:5000/v1/api" });
 
 function send(response, status, payload) {
