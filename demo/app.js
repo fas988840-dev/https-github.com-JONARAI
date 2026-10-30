@@ -14,12 +14,12 @@
 
   const render = () => {
     if (!toggle || !status || !badge) return;
-    toggle.textContent = running ? "إيقاف المراقبة التجريبية" : "تشغيل المراقبة التجريبية";
+    toggle.textContent = running ? "إيقاف مراقبة AI التجريبية" : "تشغيل مراقبة AI التجريبية";
     toggle.classList.toggle("off", running);
     toggle.setAttribute("aria-pressed", String(running));
-    badge.textContent = running ? "مراقبة تجريبية تعمل" : "متوقف";
+    badge.textContent = running ? "مراقبة AI محلية تعمل" : "متوقف";
     status.textContent = running
-      ? "المراقبة المحلية تعمل — لا يوجد اتصال سوق أو تداول"
+      ? "مراقبة AI تجريبية تعمل محليًا — لا اتصال سوق ولا تداول"
       : "المراقب متوقف";
     document.documentElement.dataset.demo = running ? "on" : "off";
   };
