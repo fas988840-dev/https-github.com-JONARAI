@@ -64,6 +64,9 @@ export function quoteFresh(updatedAt, now = Date.now(), maxAgeMs = 15000) {
 export function createGatewayClient({ baseUrl, fetchImpl = fetch, timeoutMs = 8000 }) {
   if (!baseUrl) throw new Error("IBKR_GATEWAY_URL is required");
   const base = baseUrl.replace(/\/$/, "");
+  const boundedTimeoutMs = Number.isFinite(timeoutMs)
+    ? Math.min(Math.max(Math.trunc(timeoutMs), 1000), 30000)
+    : 8000;
   return async function gateway(path, { method = "GET", params, body } = {}) {
     const url = new URL(base + path);
     Object.entries(params || {}).forEach(([key, value]) => {
@@ -75,7 +78,7 @@ export function createGatewayClient({ baseUrl, fetchImpl = fetch, timeoutMs = 80
         method,
         headers: { accept: "application/json", ...(body ? { "content-type": "application/json" } : {}) },
         body: body ? JSON.stringify(body) : undefined,
-        signal: AbortSignal.timeout(timeoutMs),
+        signal: AbortSignal.timeout(boundedTimeoutMs),
       });
     } catch (cause) {
       if (cause?.name === "TimeoutError" || cause?.name === "AbortError") {
