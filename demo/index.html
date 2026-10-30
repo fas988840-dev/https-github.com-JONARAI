@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="JONARAI Arabic analytics demo — illustrative data only">
+  <title>JONARAI | لوحة تحليل تجريبية</title>
+  <link rel="stylesheet" href="./styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./index.html" aria-label="JONARAI الصفحة الرئيسية"><span class="brand-mark">J</span><span>JONARAI</span></a>
+    <div class="top-meta"><span class="demo-pill">وضع تجريبي</span><span id="clock">--:--:--</span></div>
+  </header>
+  <main class="page">
+    <section class="hero">
+      <div><p class="eyebrow">SPX / SPXW · لوحة مراقبة تعليمية</p><h1>مركز معلومات السوق</h1><p class="sub">واجهة تجريبية لا تتصل ببيانات سوق أو حساب وساطة.</p></div>
+      <div class="market-state"><span class="state-dot"></span><div><strong>مصدر البيانات</strong><small>بيانات توضيحية ثابتة</small></div></div>
+    </section>
+    <section class="notice" role="status"><strong>تنبيه نزاهة البيانات:</strong> جميع الأرقام والرسوم في هذه الصفحة أمثلة مصطنعة لا تمثل أسعارًا أو عقودًا حقيقية. لا تستخدمها لاتخاذ قرارات مالية.</section>
+    <section class="metrics" aria-label="مؤشرات توضيحية">
+      <article class="metric"><span>المؤشر المرجعي</span><strong>—</strong><small>غير متصل</small></article>
+      <article class="metric"><span>التقلب الضمني IV</span><strong>—</strong><small>لا توجد بيانات</small></article>
+      <article class="metric"><span>حجم الخيارات</span><strong>—</strong><small>لا توجد بيانات</small></article>
+      <article class="metric"><span>الفائدة المفتوحة OI</span><strong>—</strong><small>لا توجد بيانات</small></article>
+    </section>
+    <section class="grid">
+      <article class="panel chart-panel">
+        <div class="panel-head"><div><h2>هيكل السوق</h2><p>مكان مخصص للرسم بعد ربط مصدر موثوق</p></div><span class="tag">غير متاح</span></div>
+        <div class="empty-chart"><div class="chart-icon">⌁</div><strong>بانتظار بيانات موثقة</strong><span>لن يتم رسم أسعار افتراضية على أنها أسعار حقيقية.</span></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>سلامة البيانات</h2><p>بوابة التحقق قبل عرض أي تحليل</p></div><span class="tag muted">مغلقة</span></div>
+        <ul class="checks">
+          <li><span>اتصال مزود البيانات</span><b class="bad">غير متصل</b></li>
+          <li><span>الطابع الزمني</span><b class="bad">غير متاح</b></li>
+          <li><span>تغطية سلسلة الخيارات</span><b class="bad">غير متاحة</b></li>
+          <li><span>التحقق من التأخير</span><b class="bad">لم يُختبر</b></li>
+        </ul>
+        <div class="gate"><strong>DATA INTEGRITY GATE</strong><span>مغلق — لا توجد بيانات سوق معتمدة</span></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>مكونات التحليل</h2><p>تظهر بعد التحقق من مصدر البيانات</p></div></div>
+        <div class="feature-list"><span>سلسلة الخيارات وGreeks</span><span>حجم CALL / PUT و OI</span><span>Gamma / Delta Exposure</span><span>VWAP والسيولة</span><span>الطابع الزمني وتأخير البيانات</span></div>
+      </article>
+      <article class="panel">
+        <div class="panel-head"><div><h2>حالة التكاملات</h2><p>لا يوجد اتصال مؤكد حتى الآن</p></div></div>
+        <div class="integration"><span>IBKR Gateway</span><b class="bad">غير متحقق</b></div>
+        <div class="integration"><span>مزود بيانات الخيارات</span><b class="bad">غير متصل</b></div>
+        <div class="integration"><span>خادم التطبيق</span><b class="bad">غير منشور</b></div>
+      </article>
+    </section>
+    <footer>JONARAI Demo · إصدار واجهة أولي · لا توصيات أو تنفيذ أوامر · <span id="date"></span></footer>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>
