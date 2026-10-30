@@ -15,12 +15,26 @@ export function cleanQuery(value) {
 }
 
 export function pickExactContract(rows, query) {
-  const wanted = query.toUpperCase();
-  const flat = Array.isArray(rows) ? rows : [];
-  return flat.find((row) => String(row.symbol || "").toUpperCase() === wanted)
-    || flat.find((row) => String(row.companyName || row.description || "").toUpperCase().includes(wanted))
-    || flat[0]
-    || null;
+  const wanted = String(query || "").trim().toUpperCase();
+  if (!wanted || !Array.isArray(rows)) return null;
+  return rows.find((row) => String(row?.symbol || "").trim().toUpperCase() === wanted) || null;
+}
+
+export function publicError(error) {
+  const known = {
+    INVALID_QUERY: { status: 400, message: "Invalid request" },
+    UNAUTHORIZED: { status: 401, message: "Unauthorized" },
+    CONFIGURATION_REQUIRED: { status: 503, message: "Service configuration required" },
+    IBKR_SESSION_REQUIRED: { status: 503, message: "IBKR session is not ready" },
+    GATEWAY_TIMEOUT: { status: 504, message: "Upstream service timed out" },
+  };
+  const code = known[error?.code] ? error.code : "BRIDGE_UPSTREAM_ERROR";
+  const fallback = { status: 502, message: "Upstream service unavailable" };
+  const selected = known[code] || fallback;
+  return {
+    status: selected.status,
+    payload: { status: "error", code, message: selected.message },
+  };
 }
 
 function numeric(value) {
@@ -47,7 +61,7 @@ export function quoteFresh(updatedAt, now = Date.now(), maxAgeMs = 15000) {
   return Number.isFinite(updatedAt) && updatedAt > 0 && now - updatedAt >= 0 && now - updatedAt <= maxAgeMs;
 }
 
-export function createGatewayClient({ baseUrl, fetchImpl = fetch, insecureTls = false }) {
+export function createGatewayClient({ baseUrl, fetchImpl = fetch, timeoutMs = 8000 }) {
   if (!baseUrl) throw new Error("IBKR_GATEWAY_URL is required");
   const base = baseUrl.replace(/\/$/, "");
   return async function gateway(path, { method = "GET", params, body } = {}) {
@@ -55,19 +69,25 @@ export function createGatewayClient({ baseUrl, fetchImpl = fetch, insecureTls = 
     Object.entries(params || {}).forEach(([key, value]) => {
       if (value !== undefined && value !== null && value !== "") url.searchParams.set(key, String(value));
     });
-    const response = await fetchImpl(url, {
-      method,
-      headers: { accept: "application/json", ...(body ? { "content-type": "application/json" } : {}) },
-      body: body ? JSON.stringify(body) : undefined,
-      // Node's built-in fetch does not expose a portable per-request TLS bypass.
-      // Keep the flag in diagnostics; terminate trusted TLS in the local gateway/proxy.
-    });
+    let response;
+    try {
+      response = await fetchImpl(url, {
+        method,
+        headers: { accept: "application/json", ...(body ? { "content-type": "application/json" } : {}) },
+        body: body ? JSON.stringify(body) : undefined,
+        signal: AbortSignal.timeout(timeoutMs),
+      });
+    } catch (cause) {
+      if (cause?.name === "TimeoutError" || cause?.name === "AbortError") {
+        throw Object.assign(new Error("Gateway request timed out"), { code: "GATEWAY_TIMEOUT" });
+      }
+      throw Object.assign(new Error("Gateway request failed"), { code: "IBKR_GATEWAY_ERROR" });
+    }
     const payload = await response.json().catch(() => ({}));
     if (!response.ok) {
-      const error = new Error(payload.error || payload.message || `IBKR gateway returned ${response.status}`);
-      error.status = response.status;
-      error.code = response.status === 401 ? "IBKR_SESSION_REQUIRED" : "IBKR_GATEWAY_ERROR";
-      throw error;
+      throw Object.assign(new Error("Gateway returned an unsuccessful response"), {
+        code: response.status === 401 ? "IBKR_SESSION_REQUIRED" : "IBKR_GATEWAY_ERROR",
+      });
     }
     return payload;
   };
