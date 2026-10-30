@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: jonarai-ibkr-bridge
+    runtime: node
+    plan: free
+    region: frankfurt
+    rootDir: ibkr-bridge
+    buildCommand: npm install --omit=dev --no-audit --no-fund
+    startCommand: npm start
+    healthCheckPath: /health
+    autoDeploy: true
+    envVars:
+      - key: NODE_VERSION
+        value: "20"
+      - key: BRIDGE_API_TOKEN
+        generateValue: true
+      - key: IBKR_GATEWAY_URL
+        sync: false
