@@ -1,28 +1,18 @@
-# JONARAI Arabic Demo
+# JONARAI MVP Demo
 
-This directory is an isolated, static UI prototype. It is not the production website and does not connect to IBKR, a market-data vendor, a broker account, or an order-routing service.
+An Arabic RTL, read-only educational MVP interface.
 
-## Run locally
+## Run
+Open `index.html` in a modern browser. No build step is required.
 
-Open `index.html` in a modern browser. No build step or package installation is required.
+## Robot button
+The button starts and stops a local UI demonstration only. It does not connect to IBKR, fetch market data, create signals, or submit/modify/cancel orders. It is not a trading bot.
 
-## Safety and data-integrity contract
+## Data and subscriptions
+No paid market-data subscription is activated by this demo. Before any provider integration, the account owner must independently review provider coverage, exchange entitlements, fees, and redistribution terms. Never place credentials or API keys in browser code.
 
-- All market metrics are intentionally blank.
-- No synthetic price, options chain, Greeks, gamma exposure, volume, or trade signal is presented as live data.
-- The data-integrity gate remains closed until a real provider is configured and its symbol, timestamp, entitlement, delay, and coverage are validated.
-- No order-entry, account, payment, or brokerage execution controls are included.
-- This prototype is for interface review only.
-
-## Before any real-data integration
-
-1. Select a licensed options-data provider and confirm SPX/SPXW coverage, Greeks, historical data, rate limits, redistribution rights, and total cost.
-2. Define a server-side adapter and typed normalized schema; keep credentials server-side.
-3. Validate timestamps, exchange calendar, stale-data thresholds, missing strikes, crossed markets, and provider outages.
-4. Add automated contract tests with recorded fixtures clearly marked as fixtures.
-5. Keep broker connectivity read-only in the demo environment.
-6. Run a full data-quality and operational test suite before enabling any live-data display.
-
-## Deployment
-
-Do not point the existing Netlify production site at this directory. Deploy only to a separate staging site after its owner confirms the site and build settings.
+## Integrity
+- Market values remain blank until a provider and timestamps are verified.
+- Missing or stale data keeps the gate closed and state at `NO TRADE`.
+- SPX/SPXW chain, Greeks, IV, OI, and flow must be validated separately.
+- This prototype does not connect to a brokerage account and has no order-execution capability.
