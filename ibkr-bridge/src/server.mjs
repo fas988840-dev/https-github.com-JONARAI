@@ -5,6 +5,7 @@ import {
   createGatewayClient,
   noTradeDecision,
   pickExactContract,
+  publicError,
   quoteFresh,
   searchContracts,
   sessionStatus,
@@ -14,7 +15,10 @@ import {
 const port = Number(process.env.PORT || 8788);
 const token = process.env.BRIDGE_API_TOKEN || "";
 const allowedOrigin = process.env.CORS_ORIGIN || "";
-const gateway = createGatewayClient({ baseUrl: process.env.IBKR_GATEWAY_URL || "https://localhost:5000/v1/api" });
+const gateway = createGatewayClient({
+  baseUrl: process.env.IBKR_GATEWAY_URL || "https://localhost:5000/v1/api",
+  timeoutMs: Number(process.env.IBKR_GATEWAY_TIMEOUT_MS || 8000),
+});
 
 function send(response, status, payload) {
   response.writeHead(status, {
@@ -109,11 +113,10 @@ http.createServer((request, response) => {
     response.writeHead(204, { "cache-control": "no-store" });
     return response.end();
   }
-  route(request, response).catch((error) => send(response, error.status || 500, {
-    status: "error",
-    code: error.code || "BRIDGE_ERROR",
-    message: error.message,
-  }));
+  route(request, response).catch((error) => {
+    const safe = publicError(error);
+    send(response, safe.status, safe.payload);
+  });
 }).listen(port, "0.0.0.0", () => {
   console.log(`JONARAI IBKR bridge listening on ${port} (read-only)`);
 });
