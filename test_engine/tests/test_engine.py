@@ -1,6 +1,6 @@
 import asyncio, json, unittest
 from pathlib import Path
-from orchestrator import run_all, load_fixture, validate_catalog, validate_mode, SafetyError
+from test_engine.orchestrator import run_all, load_fixture, validate_catalog, validate_mode, SafetyError
 class EngineTests(unittest.TestCase):
  def test_catalog_has_80_unique_agents(self): self.assertEqual(len(validate_catalog()),80); self.assertEqual(len({a['agent_id'] for a in validate_catalog()}),80)
  def test_synthetic_integration_returns_all_agents(self):
