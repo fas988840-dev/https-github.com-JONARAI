@@ -328,7 +328,7 @@ test("cost accounting matches explicit fill and fee arithmetic", () => {
 });
 
 test("end-of-data immediately after entry closes with zero held bars", () => {
-  const bars = fixture.slice(0, 2).concat([{...fixture[1], time: "09:40", close: 101.1, high: 102, low: 100, open: 101}]);
+  const bars = fixture.slice(0, 2).concat([{...fixture[1], time: "09:40", close: 101.1, high: 102, low: 101, open: 101.1}]);
   const result = runPaperSimulation(bars);
   assert.equal(result.trades.length, 1);
   assert.equal(result.trades[0].reason, "END_OF_DATA");
