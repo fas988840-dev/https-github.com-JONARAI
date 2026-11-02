@@ -18,8 +18,17 @@ def validate_mode(payload):
 def validate_catalog(catalog=CATALOG):
     agents = catalog.get("agents", [])
     ids = [a.get("agent_id") for a in agents]
-    if catalog.get("group_count") != 1 or len(agents) != 80 or len(set(ids)) != 80 or any(not x for x in ids):
-        raise ValueError("Catalog must contain exactly 80 unique agents in one group")
+    if (
+        catalog.get("group_count") != 1
+        or catalog.get("agent_count") != 80
+        or not catalog.get("group_id")
+        or len(agents) != 80
+        or len(set(ids)) != 80
+        or any(not x for x in ids)
+        or any(a.get("group_id") != catalog.get("group_id") for a in agents)
+        or any(not a.get("domain") or not a.get("responsibility") for a in agents)
+    ):
+        raise ValueError("Catalog must contain 80 uniquely identified agents with complete, consistent group contracts")
     return agents
 
 async def _run_agent(agent, payload, semaphore):
