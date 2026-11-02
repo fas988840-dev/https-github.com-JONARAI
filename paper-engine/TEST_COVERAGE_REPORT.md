@@ -1,13 +1,13 @@
 # JONARAI Offline Paper Engine — Test Coverage Report
 
 **Scope:** `feature/synthetic-paper-engine` only.  
-**Verified branch HEAD:** `9c193ab8dad764eaf2a11353e8da69137ea0ac2a`  
-**Verification:** GitHub Actions run [41543201282](https://github.com/fas988840-dev/https-github.com-JONARAI/actions/runs/41543201282) — **SUCCESS**.  
+**Verified branch HEAD:** `4c444c6f5790024d97d5aa5a1086ecf6cde521bd`  
+**Verification:** GitHub Actions run [41544882183](https://github.com/fas988840-dev/https-github.com-JONARAI/actions/runs/41544882183) — **SUCCESS**.  
 **Safety boundary:** synthetic fixtures only; no live data, broker connection, order routing, deployment, or changes to `main`.
 
 ## Executive summary
 
-The P0 additions are now CI-verified. The workflow checked out the exact branch HEAD above, ran `npm test` on Ubuntu 24.04.5 / Node.js 24.22.1, and passed **23/23 tests (0 failures)**. The deterministic demo command also exited successfully.
+The P0 additions and the priority P1 tests below are CI-verified. The workflow checked out the exact branch HEAD above, ran `npm test` on Ubuntu 24.04.5 / Node.js 24.22.1, and passed **28/28 tests (0 failures)**. The deterministic demo now asserts and produces exactly one synthetic `TARGET` trade.
 
 This confirms test execution, not production readiness or trading performance.
 
@@ -15,10 +15,10 @@ This confirms test execution, not production readiness or trading performance.
 
 - Branch: `feature/synthetic-paper-engine`
 - Commit: `9c193ab8dad764eaf2a11353e8da69137ea0ac2a`
-- Run: `41543201282` — push event, completed, success
+- Run: `41544882183` — push event, completed, success
 - Job: `node-tests` — completed, success
 - Steps: checkout, setup Node, offline synthetic tests, deterministic fixture demo — all completed successfully
-- Test command: `npm test` → 23 tests, 23 passed, 0 failed, 0 skipped
+- Test command: `npm test` → 28 tests, 28 passed, 0 failed, 0 skipped
 - Demo command: `npm run demo` → exit success
 - Demo output: `mode: OFFLINE_PAPER_ONLY`, `source: SYNTHETIC_FIXTURE`, `executionEnabled: false`, `brokerConnected: false`
 - Demo produced **zero trades** (`trades: []`). Therefore the demo currently proves execution and safety flags, but does not demonstrate a non-empty trade path.
@@ -38,7 +38,7 @@ This confirms test execution, not production readiness or trading performance.
 | Flat accounting | `FLAT` classification and `summary.flats` reconciliation | CI pass |
 | Sequential trades | Two simulated trades with ordered `TARGET` then `STOP`; summary count reconciliation | CI pass |
 | Exit handling | Stop-first ambiguity, target, stop, time exit and end-of-data paths | CI pass |
-| Summary metrics | Win/loss/flat counts, win rate, net return and average trade | CI pass |
+| Summary metrics | Win/loss/flat counts, win rate, net return and average trade | CI pass |\n\n## Priority P1 tests added and verified\n\n- Strict entry-gate boundaries: close equal to previous high rejected; EMA20 equal to EMA50 rejected; volume ratio exactly at minimum accepted; OI delta zero rejected.\n- `maxHoldBars: 1` exits on the first eligible bar and records one held bar.\n- Stop has priority over time exit when both conditions occur on the max-hold bar.\n- Exact fill, gross-return, fee and slippage arithmetic is asserted against independently calculated expected values.\n- End-of-data immediately after entry closes the position with the expected reason and held-bar count.\n\nAll five additions pass in CI (28 total tests).
 
 ## Code review findings
 
