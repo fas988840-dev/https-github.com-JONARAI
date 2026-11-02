@@ -9,15 +9,23 @@ const REQUIRED_SOURCE = "SYNTHETIC_FIXTURE";
 export function validateBars(bars) {
   if (!Array.isArray(bars) || bars.length < 3) throw new Error("At least 3 bars are required");
   const seenTimes = new Set();
+  let previousTime = null;
   for (const [i, b] of bars.entries()) {
+    if (b === null || typeof b !== "object" || Array.isArray(b)) {
+      throw new Error(`Bar ${i} must be an object`);
+    }
     if (typeof b.time === "string" && seenTimes.has(b.time)) {
       throw new Error(`Bar ${i} has duplicate time`);
     }
     seenTimes.add(b.time);
-    if (b.source !== REQUIRED_SOURCE) throw new Error(`Bar ${i} rejected: source must be ${REQUIRED_SOURCE}`);
     if (typeof b.time !== "string" || !b.time.trim()) {
       throw new Error(`Bar ${i} has invalid time`);
     }
+    if (previousTime !== null && b.time <= previousTime) {
+      throw new Error(`Bar ${i} time is not strictly increasing`);
+    }
+    previousTime = b.time;
+    if (b.source !== REQUIRED_SOURCE) throw new Error(`Bar ${i} rejected: source must be ${REQUIRED_SOURCE}`);
     for (const k of ["open", "high", "low", "close", "volume", "ema20", "ema50", "volumeRatio", "oiDelta"]) {
       if (typeof b[k] !== "number" || !Number.isFinite(b[k])) {
         throw new Error(`Bar ${i} has invalid ${k}`);
@@ -45,8 +53,23 @@ export function runPaperSimulation(bars, config = {}) {
     slippagePct: 0.0005,
     ...config
   };
-  if (!(cfg.stopPct > 0 && cfg.rewardRisk > 0 && cfg.maxHoldBars >= 1)) {
-    throw new Error("Invalid risk configuration");
+  const numericConfig = ["volumeRatioMin", "stopPct", "rewardRisk", "maxHoldBars", "feePctPerSide", "slippagePct"];
+  for (const key of numericConfig) {
+    if (typeof cfg[key] !== "number" || !Number.isFinite(cfg[key])) {
+      throw new Error(`Invalid configuration: ${key} must be a finite number`);
+    }
+  }
+  if (cfg.volumeRatioMin < 0) throw new Error("Invalid configuration: volumeRatioMin must be >= 0");
+  if (cfg.stopPct <= 0) throw new Error("Invalid configuration: stopPct must be > 0");
+  if (cfg.rewardRisk <= 0) throw new Error("Invalid configuration: rewardRisk must be > 0");
+  if (!Number.isInteger(cfg.maxHoldBars) || cfg.maxHoldBars < 1) {
+    throw new Error("Invalid configuration: maxHoldBars must be a positive integer");
+  }
+  if (cfg.feePctPerSide < 0 || cfg.feePctPerSide >= 1) {
+    throw new Error("Invalid configuration: feePctPerSide must be in [0, 1)");
+  }
+  if (cfg.slippagePct < 0 || cfg.slippagePct >= 1) {
+    throw new Error("Invalid configuration: slippagePct must be in [0, 1)");
   }
 
   const trades = [];
@@ -128,6 +151,7 @@ export function runPaperSimulation(bars, config = {}) {
     trades,
     summary: {
       trades: trades.length, wins, losses,
+      flats: trades.filter(t => t.result === "FLAT").length,
       winRatePct: trades.length ? round(wins / trades.length * 100, 2) : 0,
       netReturnPct: round(netReturns.reduce((a, b) => a + b, 0), 4),
       averageTradePct: trades.length ? round(netReturns.reduce((a, b) => a + b, 0) / trades.length, 4) : 0,
