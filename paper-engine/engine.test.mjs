@@ -156,17 +156,20 @@ test("supports multiple sequential simulated exit types and reconciles counts", 
   const bars = [
     {...fixture[0], time:"09:30"},
     {...fixture[1], time:"09:35"},
-    {...fixture[2], time:"09:40", high:101.5, low:100.5, close:101},
-    {...fixture[1], time:"09:45"},
-    {...fixture[2], time:"09:50", high:102.1, low:100.8, close:102},
-    {...fixture[1], time:"09:55"},
-    {...fixture[2], time:"10:00", high:101.5, low:100.5, close:101}
+    // First position reaches its target without touching its stop.
+    {...fixture[2], time:"09:40", high:102.1, low:100.8, close:102},
+    // A fresh breakout after the first position has closed.
+    {...fixture[1], time:"09:45", open:102.1, high:102.8, low:102, close:102.5},
+    // Second position reaches its stop, but not its target.
+    {...fixture[2], time:"09:50", high:102.7, low:101.8, close:102}
   ];
   const result = runPaperSimulation(bars);
-  assert.deepEqual(result.trades.map(t => t.reason), ["END_OF_DATA"]);
-  assert.equal(result.summary.trades, result.trades.length);
+  assert.deepEqual(result.trades.map(t => t.reason), ["TARGET", "STOP"]);
+  assert.equal(result.trades.length, 2);
+  assert.equal(result.summary.trades, 2);
   assert.equal(result.summary.wins, result.trades.filter(t => t.result === "WIN").length);
   assert.equal(result.summary.losses, result.trades.filter(t => t.result === "LOSS").length);
+  assert.equal(result.summary.wins + result.summary.losses, result.summary.trades);
 });
 
 test("summary reconciles win rate, net return and average trade", () => {
