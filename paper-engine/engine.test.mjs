@@ -201,3 +201,69 @@ test("empty simulation summary uses zero-valued metrics", () => {
   assert.equal(result.summary.netReturnPct, 0);
   assert.equal(result.summary.averageTradePct, 0);
 });
+
+
+test("rejects malformed bar structures and required fields with controlled errors", () => {
+  for (const badBar of [null, undefined, [], "bar", 42]) {
+    const bars = fixture.map(x => ({...x}));
+    bars[1] = badBar;
+    assert.throws(() => validateBars(bars), /must be an object/);
+  }
+  for (const field of ["time", "source"]) {
+    const bars = fixture.map(x => ({...x}));
+    delete bars[1][field];
+    assert.throws(() => validateBars(bars), field === "time" ? /invalid time/ : /source must be/);
+  }
+  for (const value of [[], {}, new Number(2)]) {
+    const bars = fixture.map(x => ({...x}));
+    bars[1].volume = value;
+    assert.throws(() => validateBars(bars), /invalid volume/);
+  }
+});
+
+test("rejects blank and out-of-order timestamps", () => {
+  const blank = fixture.map(x => ({...x}));
+  blank[1].time = "  ";
+  assert.throws(() => validateBars(blank), /invalid time/);
+  const outOfOrder = fixture.map(x => ({...x}));
+  outOfOrder[2].time = "09:34";
+  assert.throws(() => validateBars(outOfOrder), /strictly increasing/);
+});
+
+test("rejects invalid configuration values across every setting", () => {
+  const invalidCases = [
+    [{volumeRatioMin: NaN}, /volumeRatioMin must be a finite number/],
+    [{volumeRatioMin: -1}, /volumeRatioMin must be >= 0/],
+    [{stopPct: Infinity}, /stopPct must be a finite number/],
+    [{stopPct: 0}, /stopPct must be > 0/],
+    [{stopPct: -0.1}, /stopPct must be > 0/],
+    [{rewardRisk: NaN}, /rewardRisk must be a finite number/],
+    [{rewardRisk: 0}, /rewardRisk must be > 0/],
+    [{maxHoldBars: 1.5}, /maxHoldBars must be a positive integer/],
+    [{maxHoldBars: 0}, /maxHoldBars must be a positive integer/],
+    [{maxHoldBars: Infinity}, /maxHoldBars must be a finite number/],
+    [{feePctPerSide: -0.01}, /feePctPerSide must be in/],
+    [{feePctPerSide: NaN}, /feePctPerSide must be a finite number/],
+    [{slippagePct: -0.01}, /slippagePct must be in/],
+    [{slippagePct: 1}, /slippagePct must be in/]
+  ];
+  for (const [config, message] of invalidCases) {
+    assert.throws(() => runPaperSimulation(fixture, config), message);
+  }
+});
+
+test("classifies zero-net outcomes as FLAT and reconciles flat count", () => {
+  const bars = [
+    {...fixture[0]},
+    {...fixture[1]},
+    {...fixture[2], high: 101.5, low: 100.5, close: 101}
+  ];
+  const result = runPaperSimulation(bars, {feePctPerSide: 0, slippagePct: 0});
+  // Entry and final close are both 101.1 only when the last close matches entry.
+  bars[2].close = 101.1;
+  const flat = runPaperSimulation(bars, {feePctPerSide: 0, slippagePct: 0});
+  assert.equal(flat.trades[0].result, "FLAT");
+  assert.equal(flat.summary.flats, 1);
+  assert.equal(flat.summary.trades, flat.summary.wins + flat.summary.losses + flat.summary.flats);
+  assert.equal(result.summary.flats, 0);
+});
