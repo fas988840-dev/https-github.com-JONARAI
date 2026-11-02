@@ -335,3 +335,52 @@ test("end-of-data immediately after entry closes with zero held bars", () => {
   assert.equal(result.trades[0].heldBars, 1);
   assert.equal(result.trades[0].exitTime, "09:40");
 });
+
+
+test("rejects finite extreme prices when derived risk levels overflow", () => {
+  const bars = fixture.map(x => ({...x}));
+  bars[1] = {...bars[1], close: 1.79e308, high: 1.79e308, low: 1.78e308, open: 1.78e308};
+  assert.throws(() => runPaperSimulation(bars), /Unrepresentable derived price levels/);
+});
+
+test("rejects subnormal prices when risk underflows to zero", () => {
+  const bars = fixture.map(x => ({...x}));
+  bars[1] = {...bars[1], close: Number.MIN_VALUE, high: Number.MIN_VALUE, low: Number.MIN_VALUE, open: Number.MIN_VALUE};
+  assert.throws(() => runPaperSimulation(bars), /Unrepresentable derived price levels/);
+});
+
+test("rejects non-finite accounting results caused by extreme configuration", () => {
+  const bars = fixture.map(x => ({...x}));
+  assert.throws(() => runPaperSimulation(bars, {feePctPerSide: 0.9999999999999999}), /Non-finite trade accounting result/);
+});
+
+test("skippedBars counts only bars evaluated without an entry or active position", () => {
+  const noSignals = fixture.slice(0, 3).map(x => ({...x, volumeRatio: 1, oiDelta: 0}));
+  const noTrade = runPaperSimulation(noSignals);
+  assert.equal(noTrade.summary.trades, 0);
+  assert.equal(noTrade.summary.skippedBars, 2);
+
+  const signalThenExit = [
+    {...fixture[0]},
+    {...fixture[1]},
+    {...fixture[2], high: 102.1, low: 100.8, close: 102},
+    {...fixture[2], time: "09:45", high: 101.5, low: 100.5, close: 101}
+  ];
+  const withTrade = runPaperSimulation(signalThenExit);
+  assert.equal(withTrade.trades.length, 1);
+  assert.equal(withTrade.trades[0].reason, "TARGET");
+  assert.equal(withTrade.summary.skippedBars, 1);
+});
+
+test("large but representable prices retain finite trade outputs", () => {
+  const bars = [
+    {...fixture[0], open: 1e100, high: 1.01e100, low: 0.99e100, close: 1e100},
+    {...fixture[1], open: 1e100, high: 1.02e100, low: 1e100, close: 1.011e100},
+    {...fixture[2], open: 1.011e100, high: 1.04e100, low: 1.01e100, close: 1.03e100}
+  ];
+  const result = runPaperSimulation(bars);
+  assert.equal(result.trades.length, 1);
+  for (const value of Object.values(result.trades[0]).filter(v => typeof v === "number")) {
+    assert.ok(Number.isFinite(value));
+  }
+});
