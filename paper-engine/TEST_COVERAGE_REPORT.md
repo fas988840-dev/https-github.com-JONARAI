@@ -78,3 +78,9 @@ Coverage is useful for the basic happy path and several guardrails, but it is no
 - No live data, broker integration, order routing, deployment, or edits to main.
 
 **Conclusion:** the current 19-test suite is an initial regression layer, not complete validation of the simulation engine. Prioritize P0 gaps before broader scenario testing.
+
+## CI verification after adding this report
+
+The documentation commit triggered workflow run 41540748086 on feature/synthetic-paper-engine. Runtime setup succeeded on Ubuntu 24.04 and Node.js 24.22.1. The suite executed 19 tests: **18 passed, 1 failed**. The failing test is “supports multiple sequential simulated exit types and reconciles counts” at engine.test.mjs:155. Actual exit reason was STOP while the assertion expected END_OF_DATA. This confirms the existing scenario does not produce the intended path and must be redesigned before claiming multiple-exit coverage. The demo step was skipped because the test step failed. This is a test-fixture/assertion failure; the log does not establish an engine regression.
+
+**Current CI status for this report commit: failure (18/19).** The report itself was committed successfully. No production code was changed as part of report creation, and main/deployment remain untouched.
