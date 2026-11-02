@@ -36,7 +36,7 @@ test("uses stop-first when stop and target are touched in same bar", () => {
 });
 
 test("records end-of-data close for an open simulated position", () => {
-  const bars = fixture.slice(0, 2);
+  const bars = [fixture[0], fixture[1], {...fixture[2], high:101.5, low:100.5, close:101}];
   const result = runPaperSimulation(bars);
   assert.equal(result.trades.length, 1);
   assert.equal(result.trades[0].reason, "END_OF_DATA");
