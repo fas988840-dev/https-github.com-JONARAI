@@ -2,7 +2,7 @@
 
 **Scope:** `feature/synthetic-paper-engine` only.  
 **Verified branch HEAD:** `19f2e7ab9f2772ee1771b5c0cc3f494b4f26e736`  
-**Verification:** GitHub Actions run [41545280272](https://github.com/fas988840-dev/https-github.com-JONARAI/actions/runs/41544882183) — **SUCCESS**.  
+**Verification:** GitHub Actions run [41545280272](https://github.com/fas988840-dev/https-github.com-JONARAI/actions/runs/41545280272) — **SUCCESS**.  
 **Safety boundary:** synthetic fixtures only; no live data, broker connection, order routing, deployment, or changes to `main`.
 
 ## Executive summary
@@ -15,13 +15,13 @@ This confirms test execution, not production readiness or trading performance.
 
 - Branch: `feature/synthetic-paper-engine`
 - Commit: `19f2e7ab9f2772ee1771b5c0cc3f494b4f26e736`
-- Run: `41544882183` — push event, completed, success
+- Run: `41545280272` — push event, completed, success
 - Job: `node-tests` — completed, success
 - Steps: checkout, setup Node, offline synthetic tests, deterministic fixture demo — all completed successfully
 - Test command: `npm test` → 33 tests, 33 passed, 0 failed, 0 skipped
 - Demo command: `npm run demo` → exit success
 - Demo output: `mode: OFFLINE_PAPER_ONLY`, `source: SYNTHETIC_FIXTURE`, `executionEnabled: false`, `brokerConnected: false`
-- Demo produced **zero trades** (`trades: []`). Therefore the demo currently proves execution and safety flags, but does not demonstrate a non-empty trade path.
+- Demo asserts and produces one deterministic `TARGET` trade; offline safety flags remain disabled.
 - Non-blocking warning: Node.js `[DEP0040]` deprecation warning for `punycode`.
 
 ## P0 coverage verified
