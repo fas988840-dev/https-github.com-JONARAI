@@ -345,13 +345,16 @@ test("rejects finite extreme prices when derived risk levels overflow", () => {
 
 test("rejects subnormal prices when risk underflows to zero", () => {
   const bars = fixture.map(x => ({...x}));
-  bars[1] = {...bars[1], close: Number.MIN_VALUE, high: Number.MIN_VALUE, low: Number.MIN_VALUE, open: Number.MIN_VALUE};
-  assert.throws(() => runPaperSimulation(bars), /Unrepresentable derived price levels/);
+  assert.throws(() => runPaperSimulation(bars, {stopPct: Number.MIN_VALUE}), /Unrepresentable derived price levels/);
 });
 
 test("rejects non-finite accounting results caused by extreme configuration", () => {
-  const bars = fixture.map(x => ({...x}));
-  assert.throws(() => runPaperSimulation(bars, {feePctPerSide: 0.9999999999999999}), /Non-finite trade accounting result/);
+  const bars = [
+    {...fixture[0], open: 1.2e308, high: 1.21e308, low: 1.19e308, close: 1.2e308},
+    {...fixture[1], open: 1.2e308, high: 1.22e308, low: 1.2e308, close: 1.211e308},
+    {...fixture[2], open: 1.211e308, high: 1.25e308, low: 1.21e308, close: 1.23e308}
+  ];
+  assert.throws(() => runPaperSimulation(bars, {slippagePct: 0.9}), /Non-finite trade accounting result/);
 });
 
 test("skippedBars counts only bars evaluated without an entry or active position", () => {
