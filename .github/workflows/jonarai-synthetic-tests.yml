@@ -1,0 +1,19 @@
+name: JONARAI synthetic QA
+on:
+  push:
+    branches: [feature/80-agent-test-engine]
+  pull_request:
+    branches: [main]
+    paths:
+      - 'test_engine/**'
+      - '.github/workflows/jonarai-synthetic-tests.yml'
+jobs:
+  synthetic-tests:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Run unit and integration tests
+        run: python -m unittest discover -s test_engine/tests -t . -v
