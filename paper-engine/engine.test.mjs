@@ -132,3 +132,69 @@ test("never reports live execution or broker connectivity", () => {
   assert.equal(result.executionEnabled, false);
   assert.ok(result.trades.every(trade => trade.source === "SYNTHETIC_FIXTURE"));
 });
+
+
+test("accepts a time gap without fabricating intermediate bars", () => {
+  const bars = [
+    {...fixture[0], time:"09:30"},
+    {...fixture[1], time:"09:35"},
+    {...fixture[2], time:"10:15"}
+  ];
+  const result = runPaperSimulation(bars);
+  assert.equal(result.barsProcessed, 3);
+  assert.equal(result.trades.length, 1);
+  assert.equal(result.trades[0].exitTime, "10:15");
+});
+
+test("rejects duplicate bar timestamps", () => {
+  const bars = fixture.map(x => ({...x}));
+  bars[2].time = bars[1].time;
+  assert.throws(() => validateBars(bars), /duplicate time/);
+});
+
+test("supports multiple sequential simulated exit types and reconciles counts", () => {
+  const bars = [
+    {...fixture[0], time:"09:30"},
+    {...fixture[1], time:"09:35"},
+    {...fixture[2], time:"09:40", high:101.5, low:100.5, close:101},
+    {...fixture[1], time:"09:45"},
+    {...fixture[2], time:"09:50", high:102.1, low:100.8, close:102},
+    {...fixture[1], time:"09:55"},
+    {...fixture[2], time:"10:00", high:101.5, low:100.5, close:101}
+  ];
+  const result = runPaperSimulation(bars);
+  assert.deepEqual(result.trades.map(t => t.reason), ["END_OF_DATA"]);
+  assert.equal(result.summary.trades, result.trades.length);
+  assert.equal(result.summary.wins, result.trades.filter(t => t.result === "WIN").length);
+  assert.equal(result.summary.losses, result.trades.filter(t => t.result === "LOSS").length);
+});
+
+test("summary reconciles win rate, net return and average trade", () => {
+  const bars = [
+    {...fixture[0]},
+    {...fixture[1]},
+    {...fixture[2], high:102.1, low:100.8, close:102}
+  ];
+  const result = runPaperSimulation(bars);
+  const {trades, summary} = result;
+  const wins = trades.filter(t => t.result === "WIN").length;
+  const losses = trades.filter(t => t.result === "LOSS").length;
+  const total = Number(trades.reduce((sum,t)=>sum+t.netPct,0).toFixed(4));
+  assert.equal(summary.trades, trades.length);
+  assert.equal(summary.wins, wins);
+  assert.equal(summary.losses, losses);
+  assert.equal(summary.winRatePct, Number((wins / trades.length * 100).toFixed(2)));
+  assert.equal(summary.netReturnPct, total);
+  assert.equal(summary.averageTradePct, Number((total / trades.length).toFixed(4)));
+});
+
+test("empty simulation summary uses zero-valued metrics", () => {
+  const bars = fixture.slice(0,3).map(x=>({...x, close:100, volumeRatio:1, oiDelta:0}));
+  const result = runPaperSimulation(bars);
+  assert.equal(result.summary.trades, 0);
+  assert.equal(result.summary.wins, 0);
+  assert.equal(result.summary.losses, 0);
+  assert.equal(result.summary.winRatePct, 0);
+  assert.equal(result.summary.netReturnPct, 0);
+  assert.equal(result.summary.averageTradePct, 0);
+});
