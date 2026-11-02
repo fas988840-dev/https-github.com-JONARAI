@@ -4,7 +4,7 @@ import { runPaperSimulation, validateBars } from "./engine.mjs";
 
 const fixture = [
   {time:"09:30",open:100,high:101,low:99,close:100,volume:1000,ema20:99,ema50:98,volumeRatio:1,oiDelta:0,source:"SYNTHETIC_FIXTURE"},
-  {time:"09:35",open:100,high:102,low:100,close:101,volume:1200,ema20:100,ema50:99,volumeRatio:1.3,oiDelta:10,source:"SYNTHETIC_FIXTURE"},
+  {time:"09:35",open:100,high:102,low:100,close:101.1,volume:1200,ema20:100,ema50:99,volumeRatio:1.3,oiDelta:10,source:"SYNTHETIC_FIXTURE"},
   {time:"09:40",open:101,high:102,low:100,close:101,volume:900,ema20:100,ema50:99,volumeRatio:1,oiDelta:0,source:"SYNTHETIC_FIXTURE"},
   {time:"09:45",open:101,high:103,low:100.5,close:102,volume:1400,ema20:101,ema50:99,volumeRatio:1.4,oiDelta:12,source:"SYNTHETIC_FIXTURE"},
   {time:"09:50",open:102,high:102.5,low:100,close:101,volume:1100,ema20:101,ema50:99,volumeRatio:1.1,oiDelta:0,source:"SYNTHETIC_FIXTURE"}
