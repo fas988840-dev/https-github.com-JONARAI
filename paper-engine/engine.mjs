@@ -95,6 +95,9 @@ export function runPaperSimulation(bars, config = {}) {
         const exitFill = exitPrice * (1 - cfg.slippagePct);
         const grossPct = (exitFill - entryFill) / entryFill;
         const netPct = grossPct - (2 * cfg.feePctPerSide);
+        if (![entryFill, exitFill, grossPct, netPct].every(Number.isFinite)) {
+          throw new Error("Non-finite trade accounting result");
+        }
         trades.push({
           entryTime: active.entryTime, exitTime: bar.time,
           entry: round(entryFill), exit: round(exitFill),
@@ -116,9 +119,14 @@ export function runPaperSimulation(bars, config = {}) {
     if (breakout && trend && volumeOk && oiOk) {
       const entry = bar.close;
       const risk = entry * cfg.stopPct;
+      const stop = entry - risk;
+      const target = entry + risk * cfg.rewardRisk;
+      if (![risk, stop, target].every(Number.isFinite) || risk <= 0 || stop <= 0 || target <= entry) {
+        throw new Error("Unrepresentable derived price levels for entry");
+      }
       active = {
         entry, entryTime: bar.time, entryIndex: i,
-        stop: entry - risk, target: entry + risk * cfg.rewardRisk
+        stop, target
       };
     } else skipped++;
   }
@@ -127,13 +135,17 @@ export function runPaperSimulation(bars, config = {}) {
     const last = bars[bars.length - 1];
     const entryFill = active.entry * (1 + cfg.slippagePct);
     const exitFill = last.close * (1 - cfg.slippagePct);
-    const netPct = ((exitFill - entryFill) / entryFill) * 100 - 2 * cfg.feePctPerSide * 100;
+    const grossPct = ((exitFill - entryFill) / entryFill) * 100;
+    const netPct = grossPct - 2 * cfg.feePctPerSide * 100;
+    if (![entryFill, exitFill, grossPct, netPct].every(Number.isFinite)) {
+      throw new Error("Non-finite end-of-data accounting result");
+    }
     trades.push({
       entryTime: active.entryTime, exitTime: last.time,
       entry: round(entryFill), exit: round(exitFill),
       stop: round(active.stop), target: round(active.target),
       heldBars: bars.length - 1 - active.entryIndex,
-      reason: "END_OF_DATA", grossPct: round(((exitFill - entryFill) / entryFill) * 100, 4),
+      reason: "END_OF_DATA", grossPct: round(grossPct, 4),
       netPct: round(netPct, 4), result: netPct > 0 ? "WIN" : netPct < 0 ? "LOSS" : "FLAT",
       source: REQUIRED_SOURCE
     });
