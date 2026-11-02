@@ -51,3 +51,84 @@ test("applies max holding-bar time exit", () => {
   const result = runPaperSimulation(bars, {maxHoldBars:2});
   assert.equal(result.trades[0].reason, "TIME_EXIT");
 });
+
+
+test("rejects missing, null, string, NaN and infinite numeric fields", () => {
+  for (const value of [undefined, null, "", "101", NaN, Infinity, -Infinity]) {
+    const bars = fixture.map(x => ({...x}));
+    if (value === undefined) delete bars[1].close;
+    else bars[1].close = value;
+    assert.throws(() => validateBars(bars), /invalid close/);
+  }
+});
+
+test("rejects zero or negative OHLC prices", () => {
+  for (const value of [0, -1]) {
+    const bars = fixture.map(x => ({...x}));
+    bars[1].low = value;
+    assert.throws(() => validateBars(bars), /non-positive OHLC price|inconsistent OHLC/);
+  }
+});
+
+test("rejects inconsistent OHLC ranges", () => {
+  const bars = fixture.map(x => ({...x}));
+  bars[1].high = 100.5;
+  assert.throws(() => validateBars(bars), /inconsistent OHLC/);
+});
+
+test("rejects negative volume and volume ratio", () => {
+  for (const field of ["volume", "volumeRatio"]) {
+    const bars = fixture.map(x => ({...x}));
+    bars[1][field] = -0.1;
+    assert.throws(() => validateBars(bars), /negative volume data/);
+  }
+});
+
+test("requires at least three bars", () => {
+  assert.throws(() => validateBars(fixture.slice(0, 2)), /At least 3 bars/);
+});
+
+test("does not create a trade when any entry gate fails", () => {
+  for (const patch of [
+    {close: 100.5},
+    {ema20: 98},
+    {volumeRatio: 1.19},
+    {oiDelta: 0}
+  ]) {
+    const bars = fixture.slice(0, 3).map(x => ({...x}));
+    bars[1] = {...bars[1], ...patch};
+    const result = runPaperSimulation(bars);
+    assert.equal(result.summary.trades, 0);
+  }
+});
+
+test("records a target exit when only the target is touched", () => {
+  const bars = [
+    {...fixture[0]},
+    {...fixture[1]},
+    {...fixture[2], high: 102.1, low: 100.8, close: 102}
+  ];
+  const result = runPaperSimulation(bars);
+  assert.equal(result.trades.length, 1);
+  assert.equal(result.trades[0].reason, "TARGET");
+});
+
+test("includes fees and slippage in the reported net result", () => {
+  const bars = [
+    {...fixture[0]},
+    {...fixture[1]},
+    {...fixture[2], high: 101.5, low: 100.5, close: 101}
+  ];
+  const withCosts = runPaperSimulation(bars);
+  const withoutCosts = runPaperSimulation(bars, {feePctPerSide: 0, slippagePct: 0});
+  assert.ok(withCosts.trades[0].netPct < withoutCosts.trades[0].netPct);
+});
+
+test("never reports live execution or broker connectivity", () => {
+  const result = runPaperSimulation(fixture);
+  assert.equal(result.mode, "OFFLINE_PAPER_ONLY");
+  assert.equal(result.source, "SYNTHETIC_FIXTURE");
+  assert.equal(result.brokerConnected, false);
+  assert.equal(result.executionEnabled, false);
+  assert.ok(result.trades.every(trade => trade.source === "SYNTHETIC_FIXTURE"));
+});
