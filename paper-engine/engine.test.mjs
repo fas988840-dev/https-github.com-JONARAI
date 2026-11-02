@@ -267,3 +267,71 @@ test("classifies zero-net outcomes as FLAT and reconciles flat count", () => {
   assert.equal(flat.summary.trades, flat.summary.wins + flat.summary.losses + flat.summary.flats);
   assert.equal(result.summary.flats, 0);
 });
+
+
+test("entry gate boundaries are strict except volume minimum", () => {
+  const cases = [
+    {patch: {close: 101}, expected: 0}, // equal to previous high: no breakout
+    {patch: {ema20: 99}, expected: 0}, // equal EMAs: no trend
+    {patch: {volumeRatio: 1.2}, expected: 1}, // threshold is inclusive
+    {patch: {oiDelta: 0}, expected: 0} // OI must be strictly positive
+  ];
+  for (const {patch, expected} of cases) {
+    const bars = fixture.slice(0, 3).map(x => ({...x}));
+    bars[1] = {...bars[1], ...patch};
+    const result = runPaperSimulation(bars);
+    assert.equal(result.summary.trades, expected);
+  }
+});
+
+test("maxHoldBars one exits on the first bar after entry", () => {
+  const bars = [
+    {...fixture[0]},
+    {...fixture[1]},
+    {...fixture[2], high: 101.5, low: 100.5, close: 101}
+  ];
+  const result = runPaperSimulation(bars, {maxHoldBars: 1});
+  assert.equal(result.trades.length, 1);
+  assert.equal(result.trades[0].reason, "TIME_EXIT");
+  assert.equal(result.trades[0].heldBars, 1);
+});
+
+test("stop takes priority over time exit on the max-hold bar", () => {
+  const bars = [
+    {...fixture[0]},
+    {...fixture[1]},
+    {...fixture[2], high: 101.5, low: 100, close: 100.5}
+  ];
+  const result = runPaperSimulation(bars, {maxHoldBars: 1});
+  assert.equal(result.trades[0].reason, "STOP");
+  assert.equal(result.trades[0].heldBars, 1);
+});
+
+test("cost accounting matches explicit fill and fee arithmetic", () => {
+  const bars = [
+    {...fixture[0]},
+    {...fixture[1]},
+    {...fixture[2], high: 102.1, low: 100.8, close: 102}
+  ];
+  const feePctPerSide = 0.001;
+  const slippagePct = 0.002;
+  const result = runPaperSimulation(bars, {feePctPerSide, slippagePct});
+  const entryFill = 101.1 * (1 + slippagePct);
+  const exitFill = 101.1 + (101.1 * 0.006 * 1.5);
+  const slippedExit = exitFill * (1 - slippagePct);
+  const grossPct = (slippedExit - entryFill) / entryFill * 100;
+  const netPct = grossPct - 2 * feePctPerSide * 100;
+  assert.equal(result.trades[0].entry, Number(entryFill.toFixed(4)));
+  assert.equal(result.trades[0].exit, Number(slippedExit.toFixed(4)));
+  assert.equal(result.trades[0].grossPct, Number(grossPct.toFixed(4)));
+  assert.equal(result.trades[0].netPct, Number(netPct.toFixed(4)));
+});
+
+test("end-of-data immediately after entry closes with zero held bars", () => {
+  const bars = fixture.slice(0, 2).concat([{...fixture[1], time: "09:40", close: 101.1, high: 102, low: 100, open: 101}]);
+  const result = runPaperSimulation(bars);
+  assert.equal(result.trades.length, 1);
+  assert.equal(result.trades[0].reason, "END_OF_DATA");
+  assert.equal(result.trades[0].heldBars, 1);
+  assert.equal(result.trades[0].exitTime, "09:40");
+});
