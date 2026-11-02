@@ -1,0 +1,489 @@
+{
+  "version": "0.2.0",
+  "group_count": 1,
+  "group_id": "EARNINGS-INTELLIGENCE",
+  "agent_count": 80,
+  "data_mode": "synthetic",
+  "agents": [
+    {
+      "agent_id": "GOVERNANCE-SCOPE",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "governance",
+      "responsibility": "scope"
+    },
+    {
+      "agent_id": "GOVERNANCE-POLICY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "governance",
+      "responsibility": "policy"
+    },
+    {
+      "agent_id": "GOVERNANCE-CONFIGURATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "governance",
+      "responsibility": "configuration"
+    },
+    {
+      "agent_id": "GOVERNANCE-VERSIONING",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "governance",
+      "responsibility": "versioning"
+    },
+    {
+      "agent_id": "GOVERNANCE-AUDIT",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "governance",
+      "responsibility": "audit"
+    },
+    {
+      "agent_id": "GOVERNANCE-ACCESS-CONTROL",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "governance",
+      "responsibility": "access control"
+    },
+    {
+      "agent_id": "GOVERNANCE-PRIVACY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "governance",
+      "responsibility": "privacy"
+    },
+    {
+      "agent_id": "GOVERNANCE-SECURITY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "governance",
+      "responsibility": "security"
+    },
+    {
+      "agent_id": "CALENDAR-EVENT-METADATA",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "calendar",
+      "responsibility": "event metadata"
+    },
+    {
+      "agent_id": "CALENDAR-ANNOUNCEMENT-TIME",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "calendar",
+      "responsibility": "announcement time"
+    },
+    {
+      "agent_id": "CALENDAR-TIMEZONE",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "calendar",
+      "responsibility": "timezone"
+    },
+    {
+      "agent_id": "CALENDAR-FISCAL-PERIOD",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "calendar",
+      "responsibility": "fiscal period"
+    },
+    {
+      "agent_id": "CALENDAR-DEADLINE",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "calendar",
+      "responsibility": "deadline"
+    },
+    {
+      "agent_id": "CALENDAR-CAPTURE-WINDOW",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "calendar",
+      "responsibility": "capture window"
+    },
+    {
+      "agent_id": "CALENDAR-CALENDAR-VALIDATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "calendar",
+      "responsibility": "calendar validation"
+    },
+    {
+      "agent_id": "CALENDAR-EVENT-STATUS",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "calendar",
+      "responsibility": "event status"
+    },
+    {
+      "agent_id": "RESEARCH-DOCUMENT-INGESTION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "research",
+      "responsibility": "document ingestion"
+    },
+    {
+      "agent_id": "RESEARCH-SOURCE-REGISTRY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "research",
+      "responsibility": "source registry"
+    },
+    {
+      "agent_id": "RESEARCH-PROVENANCE",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "research",
+      "responsibility": "provenance"
+    },
+    {
+      "agent_id": "RESEARCH-SOURCE-QUALITY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "research",
+      "responsibility": "source quality"
+    },
+    {
+      "agent_id": "RESEARCH-DUPLICATE-DETECTION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "research",
+      "responsibility": "duplicate detection"
+    },
+    {
+      "agent_id": "RESEARCH-DOCUMENT-CLASSIFICATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "research",
+      "responsibility": "document classification"
+    },
+    {
+      "agent_id": "RESEARCH-FACT-EXTRACTION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "research",
+      "responsibility": "fact extraction"
+    },
+    {
+      "agent_id": "RESEARCH-CONFLICT-DETECTION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "research",
+      "responsibility": "conflict detection"
+    },
+    {
+      "agent_id": "REVENUE-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "revenue",
+      "responsibility": "analyst"
+    },
+    {
+      "agent_id": "REVENUE-GROWTH-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "revenue",
+      "responsibility": "growth analyst"
+    },
+    {
+      "agent_id": "REVENUE-SEGMENT-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "revenue",
+      "responsibility": "segment analyst"
+    },
+    {
+      "agent_id": "REVENUE-GEOGRAPHY-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "revenue",
+      "responsibility": "geography analyst"
+    },
+    {
+      "agent_id": "REVENUE-MARGIN-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "revenue",
+      "responsibility": "margin analyst"
+    },
+    {
+      "agent_id": "REVENUE-REVENUE-QUALITY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "revenue",
+      "responsibility": "revenue quality"
+    },
+    {
+      "agent_id": "REVENUE-REVENUE-RECONCILIATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "revenue",
+      "responsibility": "revenue reconciliation"
+    },
+    {
+      "agent_id": "REVENUE-REVENUE-SUMMARY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "revenue",
+      "responsibility": "revenue summary"
+    },
+    {
+      "agent_id": "EPS-GAAP-EPS",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "eps",
+      "responsibility": "gaap eps"
+    },
+    {
+      "agent_id": "EPS-NON-GAAP-EPS",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "eps",
+      "responsibility": "non gaap eps"
+    },
+    {
+      "agent_id": "EPS-DILUTION-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "eps",
+      "responsibility": "dilution analyst"
+    },
+    {
+      "agent_id": "EPS-SHARE-COUNT",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "eps",
+      "responsibility": "share count"
+    },
+    {
+      "agent_id": "EPS-PROFITABILITY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "eps",
+      "responsibility": "profitability"
+    },
+    {
+      "agent_id": "EPS-EXPENSE-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "eps",
+      "responsibility": "expense analyst"
+    },
+    {
+      "agent_id": "EPS-TAX-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "eps",
+      "responsibility": "tax analyst"
+    },
+    {
+      "agent_id": "EPS-EPS-RECONCILIATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "eps",
+      "responsibility": "eps reconciliation"
+    },
+    {
+      "agent_id": "EXPECTATIONS-ESTIMATE-INGESTION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "expectations",
+      "responsibility": "estimate ingestion"
+    },
+    {
+      "agent_id": "EXPECTATIONS-ESTIMATE-CUTOFF",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "expectations",
+      "responsibility": "estimate cutoff"
+    },
+    {
+      "agent_id": "EXPECTATIONS-CONSENSUS-MEAN",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "expectations",
+      "responsibility": "consensus mean"
+    },
+    {
+      "agent_id": "EXPECTATIONS-CONSENSUS-MEDIAN",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "expectations",
+      "responsibility": "consensus median"
+    },
+    {
+      "agent_id": "EXPECTATIONS-ESTIMATE-DISPERSION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "expectations",
+      "responsibility": "estimate dispersion"
+    },
+    {
+      "agent_id": "EXPECTATIONS-ESTIMATE-OUTLIER",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "expectations",
+      "responsibility": "estimate outlier"
+    },
+    {
+      "agent_id": "EXPECTATIONS-ANALYST-COUNT",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "expectations",
+      "responsibility": "analyst count"
+    },
+    {
+      "agent_id": "EXPECTATIONS-EXPECTATIONS-SUMMARY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "expectations",
+      "responsibility": "expectations summary"
+    },
+    {
+      "agent_id": "GUIDANCE-GUIDANCE-INGESTION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "guidance",
+      "responsibility": "guidance ingestion"
+    },
+    {
+      "agent_id": "GUIDANCE-GUIDANCE-RANGE",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "guidance",
+      "responsibility": "guidance range"
+    },
+    {
+      "agent_id": "GUIDANCE-GUIDANCE-COMPARISON",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "guidance",
+      "responsibility": "guidance comparison"
+    },
+    {
+      "agent_id": "GUIDANCE-GUIDANCE-TREND",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "guidance",
+      "responsibility": "guidance trend"
+    },
+    {
+      "agent_id": "GUIDANCE-GUIDANCE-ASSUMPTIONS",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "guidance",
+      "responsibility": "guidance assumptions"
+    },
+    {
+      "agent_id": "GUIDANCE-GUIDANCE-CONFLICT",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "guidance",
+      "responsibility": "guidance conflict"
+    },
+    {
+      "agent_id": "GUIDANCE-GUIDANCE-QUALITY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "guidance",
+      "responsibility": "guidance quality"
+    },
+    {
+      "agent_id": "GUIDANCE-GUIDANCE-SUMMARY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "guidance",
+      "responsibility": "guidance summary"
+    },
+    {
+      "agent_id": "HISTORY-HISTORICAL-REVENUE",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "history",
+      "responsibility": "historical revenue"
+    },
+    {
+      "agent_id": "HISTORY-HISTORICAL-EPS",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "history",
+      "responsibility": "historical eps"
+    },
+    {
+      "agent_id": "HISTORY-PERIOD-CONTINUITY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "history",
+      "responsibility": "period continuity"
+    },
+    {
+      "agent_id": "HISTORY-SEASONALITY-DESCRIPTIVE",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "history",
+      "responsibility": "seasonality descriptive"
+    },
+    {
+      "agent_id": "HISTORY-HISTORICAL-MARGINS",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "history",
+      "responsibility": "historical margins"
+    },
+    {
+      "agent_id": "HISTORY-HISTORICAL-GROWTH",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "history",
+      "responsibility": "historical growth"
+    },
+    {
+      "agent_id": "HISTORY-HISTORY-VALIDATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "history",
+      "responsibility": "history validation"
+    },
+    {
+      "agent_id": "HISTORY-HISTORY-SUMMARY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "history",
+      "responsibility": "history summary"
+    },
+    {
+      "agent_id": "QUALITY-CURRENCY-VALIDATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "quality",
+      "responsibility": "currency validation"
+    },
+    {
+      "agent_id": "QUALITY-UNIT-VALIDATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "quality",
+      "responsibility": "unit validation"
+    },
+    {
+      "agent_id": "QUALITY-TIMESTAMP-VALIDATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "quality",
+      "responsibility": "timestamp validation"
+    },
+    {
+      "agent_id": "QUALITY-MISSING-DATA",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "quality",
+      "responsibility": "missing data"
+    },
+    {
+      "agent_id": "QUALITY-STALE-DATA",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "quality",
+      "responsibility": "stale data"
+    },
+    {
+      "agent_id": "QUALITY-RANGE-VALIDATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "quality",
+      "responsibility": "range validation"
+    },
+    {
+      "agent_id": "QUALITY-DECIMAL-ARITHMETIC",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "quality",
+      "responsibility": "decimal arithmetic"
+    },
+    {
+      "agent_id": "QUALITY-DATA-QUALITY-SCORECARD",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "quality",
+      "responsibility": "data quality scorecard"
+    },
+    {
+      "agent_id": "REPORTING-SURPRISE-ANALYST",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "reporting",
+      "responsibility": "surprise analyst"
+    },
+    {
+      "agent_id": "REPORTING-EVENT-MOVE-DESCRIPTIVE",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "reporting",
+      "responsibility": "event move descriptive"
+    },
+    {
+      "agent_id": "REPORTING-METRIC-RECONCILIATION",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "reporting",
+      "responsibility": "metric reconciliation"
+    },
+    {
+      "agent_id": "REPORTING-NARRATIVE-SUMMARY",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "reporting",
+      "responsibility": "narrative summary"
+    },
+    {
+      "agent_id": "REPORTING-TABLE-ASSEMBLER",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "reporting",
+      "responsibility": "table assembler"
+    },
+    {
+      "agent_id": "REPORTING-WARNING-AGGREGATOR",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "reporting",
+      "responsibility": "warning aggregator"
+    },
+    {
+      "agent_id": "REPORTING-REPORT-COMPLETENESS",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "reporting",
+      "responsibility": "report completeness"
+    },
+    {
+      "agent_id": "REPORTING-EARNINGS-REPORT",
+      "group_id": "EARNINGS-INTELLIGENCE",
+      "domain": "reporting",
+      "responsibility": "earnings report"
+    }
+  ]
+}
