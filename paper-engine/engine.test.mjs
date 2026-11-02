@@ -161,7 +161,7 @@ test("supports multiple sequential simulated exit types and reconciles counts", 
     // A fresh breakout after the first position has closed.
     {...fixture[1], time:"09:45", open:102.1, high:102.8, low:102, close:102.5},
     // Second position reaches its stop, but not its target.
-    {...fixture[2], time:"09:50", high:102.7, low:101.8, close:102}
+    {...fixture[2], time:"09:50", open:102.2, high:102.7, low:101.8, close:102}
   ];
   const result = runPaperSimulation(bars);
   assert.deepEqual(result.trades.map(t => t.reason), ["TARGET", "STOP"]);
