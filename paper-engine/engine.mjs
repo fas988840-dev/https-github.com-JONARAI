@@ -10,7 +10,10 @@ export function validateBars(bars) {
   if (!Array.isArray(bars) || bars.length < 3) throw new Error("At least 3 bars are required");
   for (const [i, b] of bars.entries()) {
     if (b.source !== REQUIRED_SOURCE) throw new Error(`Bar ${i} rejected: source must be ${REQUIRED_SOURCE}`);
-    for (const k of ["time", "open", "high", "low", "close", "volume", "ema20", "ema50", "volumeRatio", "oiDelta"]) {
+    if (typeof b.time !== "string" || !b.time.trim()) {
+      throw new Error(`Bar ${i} has invalid time`);
+    }
+    for (const k of ["open", "high", "low", "close", "volume", "ema20", "ema50", "volumeRatio", "oiDelta"]) {
       if (b[k] === undefined || !Number.isFinite(Number(b[k]))) throw new Error(`Bar ${i} has invalid ${k}`);
     }
     if (b.high < Math.max(b.open, b.close, b.low) || b.low > Math.min(b.open, b.close, b.high)) {
