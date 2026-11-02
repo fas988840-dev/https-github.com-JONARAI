@@ -1,24 +1,24 @@
 # JONARAI Offline Paper Engine — Test Coverage Report
 
 **Scope:** `feature/synthetic-paper-engine` only.  
-**Verified branch HEAD:** `4c444c6f5790024d97d5aa5a1086ecf6cde521bd`  
-**Verification:** GitHub Actions run [41544882183](https://github.com/fas988840-dev/https-github.com-JONARAI/actions/runs/41544882183) — **SUCCESS**.  
+**Verified branch HEAD:** `19f2e7ab9f2772ee1771b5c0cc3f494b4f26e736`  
+**Verification:** GitHub Actions run [41545280272](https://github.com/fas988840-dev/https-github.com-JONARAI/actions/runs/41544882183) — **SUCCESS**.  
 **Safety boundary:** synthetic fixtures only; no live data, broker connection, order routing, deployment, or changes to `main`.
 
 ## Executive summary
 
-The P0 additions and the priority P1 tests below are CI-verified. The workflow checked out the exact branch HEAD above, ran `npm test` on Ubuntu 24.04.5 / Node.js 24.22.1, and passed **28/28 tests (0 failures)**. The deterministic demo now asserts and produces exactly one synthetic `TARGET` trade.
+The P0 additions and the priority P1 tests below are CI-verified. The workflow checked out the exact branch HEAD above, ran `npm test` on Ubuntu 24.04.5 / Node.js 24.22.1, and passed **33/33 tests (0 failures)**. The deterministic demo now asserts and produces exactly one synthetic `TARGET` trade.
 
 This confirms test execution, not production readiness or trading performance.
 
 ## Latest CI evidence
 
 - Branch: `feature/synthetic-paper-engine`
-- Commit: `9c193ab8dad764eaf2a11353e8da69137ea0ac2a`
+- Commit: `19f2e7ab9f2772ee1771b5c0cc3f494b4f26e736`
 - Run: `41544882183` — push event, completed, success
 - Job: `node-tests` — completed, success
 - Steps: checkout, setup Node, offline synthetic tests, deterministic fixture demo — all completed successfully
-- Test command: `npm test` → 28 tests, 28 passed, 0 failed, 0 skipped
+- Test command: `npm test` → 33 tests, 33 passed, 0 failed, 0 skipped
 - Demo command: `npm run demo` → exit success
 - Demo output: `mode: OFFLINE_PAPER_ONLY`, `source: SYNTHETIC_FIXTURE`, `executionEnabled: false`, `brokerConnected: false`
 - Demo produced **zero trades** (`trades: []`). Therefore the demo currently proves execution and safety flags, but does not demonstrate a non-empty trade path.
@@ -38,12 +38,12 @@ This confirms test execution, not production readiness or trading performance.
 | Flat accounting | `FLAT` classification and `summary.flats` reconciliation | CI pass |
 | Sequential trades | Two simulated trades with ordered `TARGET` then `STOP`; summary count reconciliation | CI pass |
 | Exit handling | Stop-first ambiguity, target, stop, time exit and end-of-data paths | CI pass |
-| Summary metrics | Win/loss/flat counts, win rate, net return and average trade | CI pass |\n\n## Priority P1 tests added and verified\n\n- Strict entry-gate boundaries: close equal to previous high rejected; EMA20 equal to EMA50 rejected; volume ratio exactly at minimum accepted; OI delta zero rejected.\n- `maxHoldBars: 1` exits on the first eligible bar and records one held bar.\n- Stop has priority over time exit when both conditions occur on the max-hold bar.\n- Exact fill, gross-return, fee and slippage arithmetic is asserted against independently calculated expected values.\n- End-of-data immediately after entry closes the position with the expected reason and held-bar count.\n\nAll five additions pass in CI (28 total tests).
+| Summary metrics | Win/loss/flat counts, win rate, net return and average trade | CI pass |\n| Derived-price safety | Rejects non-finite/underflowed risk, stop or target levels | CI pass |\n| Accounting safety | Rejects non-finite entry/exit fills and return calculations | CI pass |\n| Skipped-bar accounting | Confirms bars without entry/active position are counted; active trade bars are not | CI pass |\n| Extreme numeric ranges | Large representable prices remain finite; overflow and subnormal-risk configurations fail safely | CI pass |\n\n## Priority P1 tests added and verified\n\n- Strict entry-gate boundaries: close equal to previous high rejected; EMA20 equal to EMA50 rejected; volume ratio exactly at minimum accepted; OI delta zero rejected.\n- `maxHoldBars: 1` exits on the first eligible bar; stop has priority over time exit on that bar.\n- Exact fill, gross-return, fee and slippage arithmetic is checked against independently calculated values.\n- End-of-data immediately after entry is checked.\n- Very large but representable prices retain finite outputs; overflowed derived levels, subnormal risk underflow and non-finite fills are rejected with controlled errors.\n- `skippedBars` is checked for no-signal data and for bars while a position is active.\n\nAll P1 tests pass in CI (33 total tests).
 
 ## Code review findings
 
 1. **Timestamp policy is lexical, not semantic.** `validateBars` checks non-empty strings and strict string ordering. It does not parse timestamps, validate a standard format, or normalize time zones. Inputs such as mixed date formats may be ordered incorrectly. Define and enforce one documented timestamp format before relying on chronological semantics.
-2. **Demo fixture has no trade.** CI's demo succeeds, but its output has an empty trade list and four skipped bars. If the demo contract is intended to demonstrate a completed simulated trade, add an explicit demo assertion and a fixture that produces one.
+2. **Demo contract is enforced.** CI asserts one deterministic TARGET trade and the offline safety flags.
 3. **Flat test has an unnecessary preliminary simulation.** The test first runs a non-flat result, then mutates the fixture and runs the flat case. It asserts the first result has zero flats, but this adds little value; simplify in a later cleanup.
 4. **Sequential trade reconciliation excludes flats.** That test asserts wins + losses = trades. It is valid for its current TARGET/STOP fixture, but general reconciliation should include `flats`.
 5. **Return aggregation is additive.** `summary.netReturnPct` sums per-trade net percentages; it is not compounded portfolio return. Keep this distinction explicit in product-facing documentation.
