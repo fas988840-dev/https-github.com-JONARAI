@@ -46,7 +46,7 @@ test("applies max holding-bar time exit", () => {
   const bars = [
     {...fixture[0]},
     {...fixture[1]},
-    ...Array.from({length:3}, (_,i)=>({...fixture[2],time:`t${i}`,high:101.5,low:100.5,close:101}))
+    ...Array.from({length:3}, (_,i)=>({...fixture[2],time:["09:40","09:45","09:50"][i],high:101.5,low:100.5,close:101}))
   ];
   const result = runPaperSimulation(bars, {maxHoldBars:2});
   assert.equal(result.trades[0].reason, "TIME_EXIT");
