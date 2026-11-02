@@ -1,0 +1,10 @@
+{
+  "name": "jonarai-synthetic-paper-engine",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "demo": "node demo.mjs"
+  },
+  "engines": { "node": ">=20" }
+}
