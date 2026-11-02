@@ -14,7 +14,12 @@ export function validateBars(bars) {
       throw new Error(`Bar ${i} has invalid time`);
     }
     for (const k of ["open", "high", "low", "close", "volume", "ema20", "ema50", "volumeRatio", "oiDelta"]) {
-      if (b[k] === undefined || !Number.isFinite(Number(b[k]))) throw new Error(`Bar ${i} has invalid ${k}`);
+      if (typeof b[k] !== "number" || !Number.isFinite(b[k])) {
+        throw new Error(`Bar ${i} has invalid ${k}`);
+      }
+    }
+    if ([b.open, b.high, b.low, b.close].some(price => price <= 0)) {
+      throw new Error(`Bar ${i} has non-positive OHLC price`);
     }
     if (b.high < Math.max(b.open, b.close, b.low) || b.low > Math.min(b.open, b.close, b.high)) {
       throw new Error(`Bar ${i} has inconsistent OHLC`);
