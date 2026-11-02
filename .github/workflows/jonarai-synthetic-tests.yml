@@ -1,5 +1,6 @@
 name: JONARAI synthetic QA
 on:
+  workflow_dispatch:
   push:
     branches: [feature/80-agent-test-engine]
   pull_request:
