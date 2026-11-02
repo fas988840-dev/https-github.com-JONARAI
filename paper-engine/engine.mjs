@@ -8,7 +8,12 @@ const REQUIRED_SOURCE = "SYNTHETIC_FIXTURE";
 
 export function validateBars(bars) {
   if (!Array.isArray(bars) || bars.length < 3) throw new Error("At least 3 bars are required");
+  const seenTimes = new Set();
   for (const [i, b] of bars.entries()) {
+    if (typeof b.time === "string" && seenTimes.has(b.time)) {
+      throw new Error(`Bar ${i} has duplicate time`);
+    }
+    seenTimes.add(b.time);
     if (b.source !== REQUIRED_SOURCE) throw new Error(`Bar ${i} rejected: source must be ${REQUIRED_SOURCE}`);
     if (typeof b.time !== "string" || !b.time.trim()) {
       throw new Error(`Bar ${i} has invalid time`);
