@@ -1,0 +1,75 @@
+{
+  "data_mode": "synthetic",
+  "company": {
+    "ticker": "TEST",
+    "name": "Test Company",
+    "currency": "USD"
+  },
+  "period": "2026-Q3",
+  "revenue_actual_m": 1250,
+  "revenue_prior_year_m": 1100,
+  "revenue_prior_quarter_m": 1180,
+  "gaap_eps_actual": 1.42,
+  "non_gaap_eps_actual": 1.58,
+  "eps_estimates": [
+    1.1,
+    1.15,
+    1.2,
+    1.22,
+    1.25,
+    1.27,
+    1.28,
+    1.28,
+    1.3,
+    1.35,
+    1.38,
+    1.42
+  ],
+  "estimates_cutoff_utc": "2026-11-05T20:00:00Z",
+  "estimates": [
+    {
+      "value": 1.1,
+      "published_at": "2026-11-05T19:30:00Z"
+    },
+    {
+      "value": 1.2,
+      "published_at": "2026-11-05T19:45:00Z"
+    }
+  ],
+  "guidance": {
+    "revenue_low_m": 1300,
+    "revenue_high_m": 1400
+  },
+  "historical": [
+    {
+      "period": "2025-Q4",
+      "revenue_m": 1000,
+      "eps": 1.05
+    },
+    {
+      "period": "2026-Q1",
+      "revenue_m": 1050,
+      "eps": 1.1
+    },
+    {
+      "period": "2026-Q2",
+      "revenue_m": 1180,
+      "eps": 1.25
+    },
+    {
+      "period": "2026-Q3",
+      "revenue_m": 1250,
+      "eps": 1.42
+    }
+  ],
+  "event_moves_abs_pct": [
+    4,
+    4,
+    3,
+    5,
+    6,
+    3,
+    4,
+    4
+  ]
+}
