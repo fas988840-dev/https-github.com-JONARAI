@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>JONARAI | لوحة التحكم</title>
+  <style>
+    body { font-family: Tahoma, Arial, sans-serif; background: #0b1220; color: #e8eefc; margin: 0; padding: 20px; }
+    .container { max-width: 1000px; margin: auto; }
+    h1 { margin: 0 0 10px; }
+    .sub { color: #9db0d0; margin-bottom: 20px; }
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 16px; }
+    .card { background: #121a2b; border: 1px solid #24324d; border-radius: 12px; padding: 14px; }
+    .label { color: #9db0d0; font-size: 13px; }
+    .value { font-size: 20px; font-weight: bold; margin-top: 6px; }
+    .ok { color: #3dde9d; }
+    .bad { color: #ff6b6b; }
+    .warn { color: #ffd166; }
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; margin: 16px 0; }
+    button { border: 0; border-radius: 10px; padding: 12px 16px; font-size: 15px; cursor: pointer; }
+    .btn-run { background: #2f6fed; color: white; }
+    .btn-resume { background: #18a958; color: white; }
+    .btn-refresh { background: #334155; color: white; }
+    pre { background: #0a101b; border: 1px solid #24324d; border-radius: 12px; padding: 12px; overflow: auto; min-height: 120px; white-space: pre-wrap; }
+    .row { margin-bottom: 16px; }
+    input { width: 100%; padding: 10px; border-radius: 8px; border: 1px solid #24324d; background: #0a101b; color: #e8eefc; box-sizing: border-box; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>JONARAI — لوحة Paper Trading</h1>
+    <div class="sub">الواجهة مربوطة بالـ API | صفقة واحدة | إيقاف بعد خسارة</div>
+
+    <div class="row">
+      <div class="label">عنوان السيرفر</div>
+      <input id="apiBase" value="" />
+    </div>
+
+    <div class="actions">
+      <button class="btn-run" onclick="runLoop()">تشغيل دورة Paper</button>
+      <button class="btn-resume" onclick="resumeTrading()">إعادة تفعيل التداول</button>
+      <button class="btn-refresh" onclick="refreshAll()">تحديث الحالة</button>
+    </div>
+
+    <div class="grid">
+      <div class="card"><div class="label">حالة الاتصال</div><div class="value" id="conn">-</div></div>
+      <div class="card"><div class="label">التداول</div><div class="value" id="paused">-</div></div>
+      <div class="card"><div class="label">صفقة مفتوحة</div><div class="value" id="hasPos">-</div></div>
+      <div class="card"><div class="label">آخر نتيجة</div><div class="value" id="lastResult">-</div></div>
+    </div>
+
+    <div class="card row">
+      <div class="label">تفاصيل الصفقة المفتوحة</div>
+      <pre id="positionBox">لا توجد بيانات</pre>
+    </div>
+
+    <div class="card row">
+      <div class="label">آخر استجابة من السيرفر</div>
+      <pre id="logBox">-</pre>
+    </div>
+  </div>
+
+  <script>
+    // إذا الحقل فاضي، استخدم نفس رابط الصفحة (مناسب لـ Render والآيباد)
+    if (!document.getElementById('apiBase').value) {
+      document.getElementById('apiBase').value = window.location.origin;
+    }
+
+    function api() {
+      return document.getElementById('apiBase').value.replace(/\/$/, '');
+    }
+
+    function setLog(data) {
+      document.getElementById('logBox').textContent =
+        typeof data === 'string' ? data : JSON.stringify(data, null, 2);
+    }
+
+    async function refreshAll() {
+      try {
+        const res = await fetch(api() + '/status');
+        if (!res.ok) throw new Error('HTTP ' + res.status);
+        const data = await res.json();
+
+        document.getElementById('conn').textContent = 'متصل';
+        document.getElementById('conn').className = 'value ok';
+
+        const paused = !!data.trading_paused;
+        document.getElementById('paused').textContent = paused ? 'موقوف' : 'نشط';
+        document.getElementById('paused').className = 'value ' + (paused ? 'bad' : 'ok');
+
+        document.getElementById('hasPos').textContent = data.has_open_position ? 'نعم' : 'لا';
+        document.getElementById('hasPos').className = 'value ' + (data.has_open_position ? 'warn' : 'ok');
+
+        document.getElementById('lastResult').textContent = data.last_trade_result || '-';
+
+        document.getElementById('positionBox').textContent = data.open_position
+          ? JSON.stringify(data.open_position, null, 2)
+          : 'لا توجد صفقة مفتوحة';
+
+        setLog(data);
+      } catch (err) {
+        document.getElementById('conn').textContent = 'غير متصل';
+        document.getElementById('conn').className = 'value bad';
+        setLog('فشل الاتصال: ' + err.message);
+      }
+    }
+
+    async function runLoop() {
+      try {
+        setLog('جاري تشغيل الدورة...');
+        const res = await fetch(api() + '/run-loop', { method: 'POST' });
+        const data = await res.json();
+        setLog(data);
+        await refreshAll();
+      } catch (err) {
+        setLog('خطأ في تشغيل الدورة: ' + err.message);
+      }
+    }
+
+    async function resumeTrading() {
+      try {
+        const res = await fetch(api() + '/resume', { method: 'POST' });
+        const data = await res.json();
+        setLog(data);
+        await refreshAll();
+      } catch (err) {
+        setLog('خطأ في إعادة التفعيل: ' + err.message);
+      }
+    }
+
+    refreshAll();
+    setInterval(refreshAll, 15000);
+  </script>
+</body>
+</html>
