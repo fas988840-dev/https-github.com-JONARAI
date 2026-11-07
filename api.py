@@ -1,244 +1,111 @@
-"""
-JONARAI API - Final
-- Serves Arabic dashboard
-- Paper loop control
-- State persistence
-- Safe fallback if full agent stack is missing
-"""
-
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse, JSONResponse
+import json, os, random
 from datetime import datetime
-import os
-import json
 
-app = FastAPI(
-    title="JONARAI API",
-    version="1.0.0",
-    description="Paper trading control API for JONARAI"
-)
+app = FastAPI()
+app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-STATE_FILE = os.path.join(BASE_DIR, "paper_state.json")
-DASHBOARD_FILE = os.path.join(BASE_DIR, "dashboard.html")
-
-
-def default_state():
-    return {
-        "open_position": None,
-        "trading_paused": False,
-        "last_trade_result": None,
-        "closed_trades": [],
-        "last_run": None,
-        "last_mode": None,
-        "last_error": None,
-    }
-
+STATE_FILE = "paper_state.json"
 
 def load_state():
     if not os.path.exists(STATE_FILE):
-        state = default_state()
-        save_state(state)
-        return state
-
-    try:
-        with open(STATE_FILE, "r", encoding="utf-8") as f:
-            data = json.load(f)
-    except Exception:
-        data = default_state()
-        save_state(data)
-        return data
-
-    base = default_state()
-    base.update(data)
-    return base
-
+        return {
+            "open_position": None,
+            "trading_paused": False,
+            "last_result": None,
+            "closed_trades": [],
+            "price_history": []
+        }
+    with open(STATE_FILE, "r", encoding="utf-8") as f:
+        return json.load(f)
 
 def save_state(state):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2, ensure_ascii=False)
 
+def simulate_price(entry):
+    change = random.uniform(-0.07, 0.11)
+    return round(max(0.1, entry * (1 + change)), 2)
 
-def run_demo_fallback(state):
-    state["last_run"] = datetime.utcnow().isoformat()
-    state["last_mode"] = "demo_fallback"
-    state["last_error"] = None
-
-    if state.get("trading_paused"):
-        save_state(state)
-        return state
-
-    if state.get("open_position"):
-        pos = state["open_position"]
-        entry = float(pos.get("entry_price", 0) or 0)
-        current = float(pos.get("current_price", entry) or entry)
-        current = round(current * 0.98, 4)
-        pos["current_price"] = current
-        state["open_position"] = pos
-
-        if entry > 0 and current <= entry * 0.60:
-            pnl = round(current - entry, 4)
-            closed = {
-                **pos,
-                "exit_price": current,
-                "pnl": pnl,
-                "result": "LOSS",
-                "exit_reason": "Stop 40%",
-                "exit_time": datetime.utcnow().isoformat(),
-                "status": "CLOSED",
-            }
-            state["closed_trades"].append(closed)
-            state["open_position"] = None
-            state["last_trade_result"] = "LOSS"
-            state["trading_paused"] = True
-
-        save_state(state)
-        return state
-
-    state["open_position"] = {
-        "direction": "CALL",
-        "symbol": "SPY",
-        "strike": 580,
-        "expiration": "2026-11-07",
-        "type": "CALL",
-        "entry_price": 2.40,
-        "current_price": 2.40,
-        "highest_price": 2.40,
-        "lowest_price": 2.40,
-        "initial_stop_price": 1.44,
-        "entry_time": datetime.utcnow().isoformat(),
-        "status": "OPEN",
-        "source": "demo_fallback",
+def trailing_stop(entry, current):
+    pnl_pct = (current - entry) / entry
+    stop = entry * 0.60
+    stop_type = "INITIAL"
+    if pnl_pct >= 0.30:
+        stop = entry
+        stop_type = "BREAKEVEN"
+    if pnl_pct >= 0.50:
+        stop = entry * 1.20
+        stop_type = "LOCK_20"
+    return {
+        "stop": round(stop, 2),
+        "type": stop_type,
+        "pnl%": round(pnl_pct * 100, 1),
+        "hit": current <= stop
     }
-    save_state(state)
-    return state
-
 
 @app.get("/")
 def root():
-    if os.path.exists(DASHBOARD_FILE):
-        return FileResponse(DASHBOARD_FILE, media_type="text/html")
-    return {
-        "ok": True,
-        "message": "JONARAI API is running",
-        "docs": "/docs",
-        "endpoints": ["/status", "/state", "/run-loop", "/resume", "/pause", "/closed-trades", "/health"],
-    }
-
+    return FileResponse("dashboard.html")
 
 @app.get("/status")
 def status():
-    state = load_state()
-    return {
-        "ok": True,
-        "trading_paused": bool(state.get("trading_paused", False)),
-        "has_open_position": state.get("open_position") is not None,
-        "last_trade_result": state.get("last_trade_result"),
-        "open_position": state.get("open_position"),
-        "last_run": state.get("last_run"),
-        "last_mode": state.get("last_mode"),
-        "last_error": state.get("last_error"),
-    }
-
-
-@app.get("/state")
-def get_state():
     return load_state()
 
-
-@app.post("/run-loop")
-def run_loop():
+@app.post("/run")
+def run():
     state = load_state()
-    try:
-        from paper_loop import main as run_paper_loop
-        run_paper_loop()
-        state = load_state()
-        state["last_run"] = datetime.utcnow().isoformat()
-        state["last_mode"] = "full"
-        state["last_error"] = None
-        save_state(state)
-        return JSONResponse({
-            "ok": True,
-            "mode": "full",
-            "message": "تم تشغيل الحلقة الكاملة",
-            "state": state,
-        })
-    except Exception as e:
-        err = f"{type(e).__name__}: {str(e)}"
-        state = run_demo_fallback(state)
-        state["last_error"] = err
-        save_state(state)
-        return JSONResponse({
-            "ok": True,
-            "mode": "demo_fallback",
-            "message": "الحلقة الكاملة غير متاحة حالياً، تم تشغيل الوضع التجريبي",
-            "warning": err,
-            "state": state,
-        })
 
+    if state.get("trading_paused"):
+        return {"ok": False, "message": "التداول موقوف", "state": state}
+
+    if state.get("open_position"):
+        pos = state["open_position"]
+        new_price = simulate_price(pos.get("current", pos["entry"]))
+        pos["current"] = new_price
+        trail = trailing_stop(pos["entry"], new_price)
+        pos["stop"] = trail["stop"]
+        pos["stop_type"] = trail["type"]
+        pos["pnl"] = trail["pnl%"]
+
+        state["price_history"].append({"price": new_price, "time": datetime.utcnow().isoformat()})
+
+        if trail["hit"] or random.random() < 0.18:
+            result = "WIN" if trail["pnl%"] > 0 else "LOSS"
+            state["closed_trades"].append({
+                "result": result,
+                "pnl%": trail["pnl%"],
+                "entry": pos["entry"],
+                "exit": new_price,
+                "time": datetime.utcnow().isoformat()
+            })
+            state["open_position"] = None
+            state["last_result"] = result
+            if result == "LOSS":
+                state["trading_paused"] = True
+        else:
+            state["open_position"] = pos
+    else:
+        entry = round(random.uniform(2.0, 4.2), 2)
+        state["open_position"] = {
+            "entry": entry,
+            "current": entry,
+            "direction": "CALL",
+            "stop": round(entry * 0.60, 2),
+            "stop_type": "INITIAL",
+            "pnl": 0,
+            "time": datetime.utcnow().isoformat()
+        }
+        state["price_history"] = [{"price": entry, "time": datetime.utcnow().isoformat()}]
+
+    save_state(state)
+    return {"ok": True, "state": state}
 
 @app.post("/resume")
-def resume_trading():
+def resume():
     state = load_state()
     state["trading_paused"] = False
-    state["last_run"] = datetime.utcnow().isoformat()
     save_state(state)
-    return {
-        "ok": True,
-        "message": "تم إعادة تفعيل التداول",
-        "state": state,
-    }
-
-
-@app.post("/pause")
-def pause_trading():
-    state = load_state()
-    state["trading_paused"] = True
-    state["last_run"] = datetime.utcnow().isoformat()
-    save_state(state)
-    return {
-        "ok": True,
-        "message": "تم إيقاف التداول يدوياً",
-        "state": state,
-    }
-
-
-@app.get("/closed-trades")
-def closed_trades():
-    state = load_state()
-    return {
-        "ok": True,
-        "count": len(state.get("closed_trades", [])),
-        "trades": state.get("closed_trades", []),
-    }
-
-
-@app.post("/reset-state")
-def reset_state():
-    state = default_state()
-    save_state(state)
-    return {
-        "ok": True,
-        "message": "تمت إعادة ضبط الحالة",
-        "state": state,
-    }
-
-
-@app.get("/health")
-def health():
-    return {
-        "ok": True,
-        "service": "JONARAI API",
-        "time": datetime.utcnow().isoformat() + "Z",
-        "state_file": os.path.exists(STATE_FILE),
-        "dashboard_file": os.path.exists(DASHBOARD_FILE),
-    }
+    return {"ok": True, "message": "تم إعادة التفعيل"}
