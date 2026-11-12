@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,7 +12,12 @@ try:
 except ImportError:
     HAS_PG = False
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    init_db()
+    yield
+
+app = FastAPI(lifespan=lifespan)
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
 DATABASE_URL = os.getenv("DATABASE_URL")
@@ -61,7 +67,13 @@ def load_state():
     if not os.path.exists(STATE_FILE):
         return {"open_position": None, "trading_paused": False, "last_result": None, "closed_trades": [], "price_history": []}
     with open(STATE_FILE, "r", encoding="utf-8") as f:
-        return json.load(f)
+        data = json.load(f)
+        # Normalize old key names
+        if "last_trade_result" in data and "last_result" not in data:
+            data["last_result"] = data.pop("last_trade_result")
+        if "last_run" in data:
+            data.pop("last_run", None)
+        return data
 
 def save_state(state):
     conn = get_conn()
@@ -89,9 +101,24 @@ def save_state(state):
     with open(STATE_FILE, "w", encoding="utf-8") as f:
         json.dump(state, f, indent=2, ensure_ascii=False)
 
+import yfinance as yf
+
+def get_real_spx():
+    try:
+        ticker = yf.Ticker("^SPX")
+        price = ticker.history(period="1d")["Close"].iloc[-1]
+        return round(float(price), 2)
+    except Exception:
+        return 5800.0  # fallback
+
 def simulate_price(entry):
-    change = random.uniform(-0.07, 0.11)
-    return round(max(0.1, entry * (1 + change)), 2)
+    # Use real SPX change as base, scaled for option-like movement
+    real = get_real_spx()
+    base = 5800
+    change_pct = (real - base) / base
+    option_change = change_pct * 8  # leverage-like for options
+    new_price = entry * (1 + option_change * 0.15 + random.uniform(-0.03, 0.04))
+    return round(max(0.5, new_price), 2)
 
 def trailing_stop(entry, current):
     pnl_pct = (current - entry) / entry
@@ -104,10 +131,6 @@ def trailing_stop(entry, current):
         stop = entry * 1.20
         stop_type = "LOCK_20"
     return {"stop": round(stop, 2), "type": stop_type, "pnl%": round(pnl_pct * 100, 1), "hit": current <= stop}
-
-@app.on_event("startup")
-def startup():
-    init_db()
 
 @app.get("/")
 def root():
@@ -146,11 +169,13 @@ def run():
         else:
             state["open_position"] = pos
     else:
-        entry = round(random.uniform(2.0, 4.2), 2)
+        real_spx = get_real_spx()
+        entry = round(real_spx * 0.00055 + random.uniform(0.5, 1.5), 2)  # realistic option premium range
         state["open_position"] = {
             "entry": entry, "current": entry, "direction": "CALL",
             "stop": round(entry * 0.60, 2), "stop_type": "INITIAL", "pnl": 0,
-            "time": datetime.utcnow().isoformat()
+            "time": datetime.utcnow().isoformat(),
+            "spx": real_spx
         }
         state["price_history"] = [{"price": entry, "time": datetime.utcnow().isoformat()}]
 
