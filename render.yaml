@@ -1,0 +1,6 @@
+services:
+  - type: web
+    name: jonarai
+    runtime: docker
+    plan: free
+    region: oregon
